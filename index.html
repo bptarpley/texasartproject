@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Texas Art Project</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://use.typekit.net/qbi7knm.css">
+    <link rel="stylesheet" href="css/tap.css">
+</head>
+<body class="homepage">
+    <div id="tap-header-div"></div>
+
+    <div class="hero">
+        <h1 class="hero">texas art project</h1>
+    </div>
+
+    <div class="container mb-5">
+        <div class="row">
+            <div class="home-heading col-sm-4"><h2 class="home">about</h2></div>
+
+            <div class="col-sm-8">
+                <div class="row h-50">
+                    <div class="col-sm-12">&nbsp;</div>
+                </div>
+                <div class="row h-50 home-card-top">
+                    <div class="col-sm-12 bg-white">&nbsp;</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-1">&nbsp;</div>
+            <div class="col-sm-11 bg-white home-card">
+                <p>
+                    The Texas Art Project embraces the land-grant mission of Texas A&M University to enhance the lives of Texans. It creates opportunities for students, faculty, collectors, arts professionals, and communities across the state to engage with rich heritage of Texas art through exhibitions, programming, and research initiatives.
+                </p>
+                <p>
+                    The Texas Art Project is a collaboration between Linda and William Reaves, scholars and collectors of Texas art, and the Texas A&M University Art Galleries, Center of Digital Humanities Research, and College of Performance, Visualization & Fine Arts.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mb-5">
+        <div class="row">
+            <div class="home-heading col-sm-4"><h2 class="home">exhibits</h2></div>
+
+            <div class="col-sm-8">
+                <div class="row h-50">
+                    <div class="col-sm-12">&nbsp;</div>
+                </div>
+                <div class="row h-50 home-card-top">
+                    <div class="col-sm-12 bg-white">&nbsp;</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-1">&nbsp;</div>
+            <div class="col-sm-11 bg-white home-card">
+                <div class="project-card-grid">
+                    <a href="/schiwetz/" class="project-card-link">
+                        <div class="project-card">
+                            <img class="project-card-image" src="/img/project-cards/schiwetz.png" alt="Buck Schiwetz">
+                            <h3 class="project-card-title">Buck Schiwetz</h3>
+                            <p class="project-card-description">1898 – 1984</p>
+                        </div>
+                    </a>
+
+                    <a href="/dwg/" class="project-card-link">
+                        <div class="project-card">
+                            <img class="project-card-image" src="/img/project-cards/dwg.png" alt="Dallas Women's Gallery">
+                            <h3 class="project-card-title">Dallas Women's Gallery</h3>
+                            <p class="project-card-description">1975 – 1988</p>
+                        </div>
+                    </a>
+
+                    <div class="project-card">
+                        <img class="project-card-image" src="/img/project-cards/ima.png" alt="Ima Pendergrass">
+                        <h3 class="project-card-title">Ima Pendergrass</h3>
+                        <p class="project-card-description">Coming soon</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tap-footer-div"></div>
+
+    <!-- JS INCLUDES -->
+    <script src="js/bootstrap.bundle.min.js"></script>
+    <script src="js/templates/global.js"></script>
+    <!--<script src="http://localhost/static/frontend/corpora.js"></script>-->
+    <script src="js/corpora.js"></script>
+
+    <!-- MAIN JS ENTRYPOINT -->
+    <script language="javascript">
+        window.corpus = null
+
+        // MAIN ENTRY POINT
+        document.addEventListener('DOMContentLoaded', function() {
+            getCorpus(
+                'https://corpora.library.tamu.edu',
+                '6328b1338170d921f63fc09d',
+                {
+                    ArtWork: {
+                        preload: 'true',
+                        xRefs: [
+                            {field: 'artists', reference: 'Agent', multi: true},
+                            {field: 'location', reference: 'Place', multi: false},
+                            {field: 'tags', reference: 'ArtTag', multi: true},
+                            {field: 'media_types', reference: 'ArtworkMediaType', multi: true},
+                        ],
+                        sortFields: ['+title']
+                    },
+                    Agent: {
+                        preload: 'true',
+                        xRefs: [
+                            {field: 'person', reference: 'Person', multi: false},
+                            {field: 'role', reference: 'Role', multi: false},
+                        ]
+                    },
+                    Person: {
+                        preload: 'true',
+                        sortFields: ['+name']
+                    },
+                    Role: {
+                        preload: 'true',
+                        sortFields: ['+name']
+                    },
+                    Place: {
+                        preload: 'true',
+                        sortFields: ['+name']
+                    },
+                },
+                [
+                    ['ArtWork', 'Agent', 'Person']
+                ],
+                (corpus) => {
+                    window.corpus = corpus
+
+                    prependToEl(getEl('tap-header-div'), siteHeaderTemplate({}))
+                    appendToEl(getEl('tap-footer-div'), siteFooterTemplate({}))
+                }
+            )
+        })
+    </script>
+</body>
+</html>
