@@ -39,10 +39,21 @@ body {
     margin: 0 auto 0 auto;
 }
 body.homepage {
+    /* remove all the background-* rules from here */
+    position: relative;
+}
+
+body.homepage::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    z-index: -1;
     background-image: url('../img/home-masthead.png');
     background-repeat: no-repeat;
-    background-size: auto 100vh;
-    background-attachment: fixed;
+    background-size: cover;
     background-position: left top;
 }
 @media (min-width: 1750px) { body.homepage { background-size: cover; } }
