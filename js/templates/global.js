@@ -47,12 +47,12 @@ const siteFooterTemplate = (params) => `
             Texas Art Project © <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="tap-footer-link" target="_blank">CC BY-NC-SA 4.0</a>
         </div>
         <div class="tap-footer-cell">
-            <img src="/img/codhr-footer-logo.png"
+            <img src="img/codhr-footer-logo.png"
             style="height: 50px; width: auto; background-color: #FFFFFF; padding: 5px;"
             alt="The Center of Digital Humanities Research at Texas A&M University" />
         </div>
         <div class="tap-footer-cell">
-            <img src="/img/pvfa-footer-logo.png"
+            <img src="img/pvfa-footer-logo.png"
             style="height: 50px; width: auto; background-color: #FFFFFF; padding: 5px; padding-right: 17px;"
             alt="Performance, Visualization & Fine Arts Texas A&M University" />
         </div>

@@ -4,18 +4,18 @@
 
 @font-face {
     font-family: 'Mikela';
-    src: url('/font/MikelaLight.woff') format('woff');
+    src: url('../font/MikelaLight.woff') format('woff');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
 }
 @font-face {
     font-family: "ITCGaramondStdLight";
-    src: url('/font/ITCGaramondStdLight.woff2') format('woff2'), url('/font/ITCGaramondStdLight.woff') format('woff');
+    src: url('../font/ITCGaramondStdLight.woff2') format('woff2'), url('../font/ITCGaramondStdLight.woff') format('woff');
 }
 @font-face {
     font-family: "ITCGaramondStdLightItalic";
-    src: url('/font/ITCGaramondStdLightItalic.woff2') format('woff2'), url('/font/ITCGaramondStdLightItalic.woff') format('woff');
+    src: url('../font/ITCGaramondStdLightItalic.woff2') format('woff2'), url('../font/ITCGaramondStdLightItalic.woff') format('woff');
 }
 
 
@@ -39,7 +39,7 @@ body {
     margin: 0 auto 0 auto;
 }
 body.homepage {
-    background-image: url('/img/home-masthead.png');
+    background-image: url('../img/home-masthead.png');
     background-repeat: no-repeat;
     background-size: auto 100vh;
     background-attachment: fixed;
