@@ -41,6 +41,7 @@ body {
 .tap-body {
     max-width: min(100%, 1140px);
     margin: 0 auto 0 auto;
+    overflow-wrap: break-word; /* long URLs in footnotes would otherwise overflow on phones */
 }
 body.homepage {
     /* remove all the background-* rules from here */
@@ -136,7 +137,9 @@ b.dropdown-item:hover { background-color: unset !important; }
     HEADERS
 /*****************************************/
 
+/* always fill the container, which widens past some banners' natural widths at Bootstrap's xxl breakpoint */
 .tap-header-image {
+    width: 100%;
     max-width: 100%!important;
     height: auto!important;
 }
@@ -292,10 +295,27 @@ a .project-card-description { text-decoration: none; }
     padding: 0 150px;
     text-decoration: none;
 }
+@media (max-width: 767px) { .tap-byline-description { padding: 0; } }
 
 figure {
     padding: 10px 10px 0 10px;
     background-color: #F4F4F4;
+}
+figure img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+/* centered essay figures (formerly styled by WordPress core): shrink to the image's width, and keep the
+   caption from widening the figure past it */
+figure.aligncenter {
+    width: fit-content;
+    max-width: 100%;
+    margin: 1rem auto;
+}
+figure.aligncenter figcaption {
+    width: 0;
+    min-width: 100%;
 }
 figcaption {
     padding-bottom: 10px;
@@ -632,6 +652,15 @@ button.nav-link:focus {
     background-color: #f4f4f4;
     height: 100vh;
 }
+/* on phones the metadata and image viewer stack vertically, so let the page grow past the screen's height
+   (otherwise the stacked row wraps the viewer into a second column, off to the side) */
+@media (max-width: 767px) {
+    #tap-artwork-detail-div, #tap-ephemera-detail-div { height: auto; }
+    #tap-artdetail-main-row { flex-wrap: nowrap; }
+}
+/* as a flex item, the row would otherwise refuse to shrink below its content's widest unbreakable bit (i.e. a long
+   metadata label), nudging phone layouts wider than the screen */
+#tap-artdetail-main-row { min-width: 0; }
 
 #tap-artdetail-image-div {
     background-color: #FFFFFF;
@@ -700,4 +729,114 @@ button.nav-link:focus {
     color: #008DAB!important;
     font-weight: bold;
     margin-right: 8px;
+}
+
+/******************************************
+    DALLAS WOMEN'S GALLERY PAGES
+/*****************************************/
+
+/* palette shared with the DWG timeline */
+.dwg-bg1 { background-color: #EACFA2; }
+.dwg-bg1 h2, .dwg-bg1 h2 a { color: #6c5830 !important; text-decoration: none !important; }
+.dwg-bg2 { background-color: #E1B671; }
+.dwg-bg3 { background-color: #CDA15E; }
+.dwg-bg4 { background-color: #D89962; }
+.dwg-bg4 h2, .dwg-bg4 h2 a { color: #5e2f00 !important; text-decoration: none !important; }
+.dwg-bg5 { background-color: #BF7C51; }
+.dwg-bg5 h2, .dwg-bg5 h2 a { color: #fff2c1 !important; text-decoration: none !important; }
+.dwg-bg6 { background-color: #BABFA2; }
+.dwg-bg6 h2, .dwg-bg6 h2 a { color: #494e35 !important; text-decoration: none !important; }
+.dwg-bg7 { background-color: #BCAA7A; }
+.dwg-bg7 h2, .dwg-bg7 h2 a { color: #4a3f14 !important; text-decoration: none !important; }
+.dwg-bg8 { background-color: #ABA771; }
+.dwg-bg9 { background-color: #BAB8B2; }
+
+h2.normal {
+    font-style: normal !important;
+    font-size: 2rem !important;
+}
+
+/* DWG home page feature tiles: a colored title band, a tinted image strip, and a gray body */
+/* tiles are at least square, but grow when their content needs it, and tiles in the same row stretch to match.
+   (aspect-ratio can't do this: it caps tiles at square and converts content height into a minimum width, which
+   overflowed narrow screens.) the square minimum is a column's width, measured with container query units */
+.dwg-tiles {
+    container-type: inline-size;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+}
+.dwg-tile {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: calc((100cqw - 40px) / 3);
+}
+@media (max-width: 1000px) {
+    .dwg-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .dwg-tile { min-height: calc((100cqw - 20px) / 2); }
+}
+@media (max-width: 700px) {
+    .dwg-tiles { grid-template-columns: minmax(0, 1fr); }
+    .dwg-tile { min-height: 0; }
+}
+.dwg-tile h2 {
+    margin: 0;
+    padding: .5rem;
+}
+.dwg-tile-image {
+    position: relative;
+    height: 60px;
+    overflow: hidden;
+}
+.dwg-tile-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.dwg-tile-image .dwg-tile-tint {
+    position: absolute;
+    inset: 0;
+    opacity: .5;
+}
+.dwg-tile-body {
+    flex-grow: 1;
+    background-color: #F2F2F2;
+    padding: .5rem;
+}
+.dwg-tile-body p, .dwg-tile-body ul {
+    margin-top: 1.5rem;
+}
+.dwg-tile-body p + p {
+    margin-top: 0;
+}
+.dwg-tile-body li {
+    font-size: 16px;
+}
+
+.dwg-sponsors {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem 3rem;
+    padding: 1.5rem 1rem;
+    background-color: #F2F2F2;
+}
+.dwg-sponsors img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* ephemera database grid: square thumbnails, sized before their images load */
+#tap-ephemera-grid {
+    display: flex;
+    flex-wrap: wrap;
+    align-content: flex-start;
+}
+.tap-ephemera-cell img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
 }

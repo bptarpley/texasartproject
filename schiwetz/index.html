@@ -22,7 +22,7 @@
                 <input id="tap-artmenu-search-box" type="text" class="form-control form-control-sm" placeholder="Type here">
             </div>
 
-            <h2 class="tap-menu-heading mt-3">Filter</h2>
+            <h2 id="tap-artmenu-filter-heading" class="tap-menu-heading mt-3">Filter</h2>
 
             <details class="tap-artmenu-list">
                 <summary>Decade</summary>
@@ -114,6 +114,7 @@
 <script src="../js/templates/global.js"></script>
 <script src="../js/corpora.js"></script>
 <script src="../js/config.js"></script>
+<script src="../js/artmenu.js"></script>
 <script src="../js/schiwetz.js"></script>
 
 <!-- MAIN JS ENTRYPOINT -->
@@ -131,7 +132,11 @@
 
         getSchiwetzCorpus((corpus) => {
             window.corpus = corpus
-            window.artMenu = new ArtMenu(Object.keys(schiwetzFacetLabels), showArtworks)
+            window.artMenu = new ArtMenu(
+                schiwetzFacets(Object.keys(schiwetzFacetLabels)),
+                showArtworks,
+                query => searchSchiwetzArtworks(window.corpus, query)
+            )
 
             // create grid cells
             let artGrid = getEl('tap-artgrid')
@@ -162,7 +167,7 @@
             collectSchiwetzFacets(window.corpus, window.artMenu)
             window.artMenu.placeFacets()
             window.artMenu.applyInitialFilters(window.getParams)
-            window.artMenu.setupSearch(window.corpus)
+            window.artMenu.setupSearch()
             setupImageObserver()
             showArtworks()
         })
@@ -234,8 +239,8 @@
         }, {threshold: 0.3})
     }
 
-    function showArtworks(matchingArtworkIDs=null) {
-        window.visibleArtworks = window.artMenu.filterArtworks(window.corpus.schema['ArtWork'].ids, matchingArtworkIDs)
+    function showArtworks() {
+        window.visibleArtworks = window.artMenu.filterItems(window.corpus.schema['ArtWork'].ids)
 
         window.corpus.getContents('ArtWork').forEach(artwork => {
             let artworkCell = getEl(`tap-artgrid-cell-${artwork.id}`)

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Ephemera | Texas Art Project</title>
+    <link rel="stylesheet" href="../css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://use.typekit.net/qbi7knm.css">
+    <link rel="stylesheet" href="../css/tap.css">
+</head>
+<body>
+<div id="tap-header-div"></div>
+
+<div id="tap-ephemera-detail-div" class="container-fluid">
+    <div id="tap-artdetail-main-row" class="row flex-grow-1" style="padding: 20px;">
+        <div id="tap-artdetail-metadata-div" class="col-md-4 col-sm-12"></div>
+        <div id="tap-artdetail-image-div" class="col-md-8 col-sm-12"></div>
+    </div>
+</div>
+
+<div id="tap-footer-div"></div>
+
+<!-- JS INCLUDES -->
+<script src="../js/bootstrap.bundle.min.js"></script>
+<script src="../js/openseadragon/openseadragon.min.js"></script>
+<script src="../js/templates/global.js"></script>
+<script src="../js/corpora.js"></script>
+<script src="../js/config.js"></script>
+
+<!-- MAIN JS ENTRYPOINT -->
+<script language="javascript">
+    window.rootPath = '../'
+    window.getParams = new URLSearchParams(window.location.search)
+    window.artifactID = window.getParams.get('id')
+    window.dragon = null
+
+    // MAIN ENTRY POINT
+    document.addEventListener('DOMContentLoaded', function() {
+        prependToEl(getEl('tap-header-div'), siteHeaderTemplate({rootPath: window.rootPath}))
+        appendToEl(getEl('tap-footer-div'), siteFooterTemplate({rootPath: window.rootPath}))
+
+        // adjust main row depending on screen size
+        if (window.innerWidth <= 767) getEl('tap-artdetail-main-row').classList.add('flex-column-reverse')
+
+        if (!window.artifactID) {
+            showNotFound()
+            return
+        }
+
+        let api = `${TAP.corporaHost}/api/corpus/${TAP.corpusID}`
+        Promise.all([
+            fetch(`${api}/Document/${window.artifactID}/`).then(res => res.json()),
+            fetch(`${api}/Event/?f_artifacts.id=${window.artifactID}&only=id,label&page-size=100`).then(res => res.json()),
+        ])
+            .then(([artifact, events]) => showArtifact(artifact, events.records))
+            // Corpora responds to unknown IDs with an HTML error page
+            .catch(() => showNotFound())
+    })
+
+    function showArtifact(artifact, events) {
+        let metadataDiv = getEl('tap-artdetail-metadata-div')
+        let imageDiv = getEl('tap-artdetail-image-div')
+        let dragonHeight = window.innerWidth <= 767 ? '50vh' : `${imageDiv.clientHeight - 40}px`
+
+        // every file of every page, in page order
+        let tileSources = []
+        Object.keys(artifact.pages || {}).forEach(pageNumber => {
+            Object.values(artifact.pages[pageNumber].files || {}).forEach(file => {
+                tileSources.push(`${TAP.corporaHost}/iiif/2${file.path}/info.json`)
+            })
+        })
+
+        if (tileSources.length) {
+            appendToEl(imageDiv, `<div id="tap-dragon" class="w-100" style="height: ${dragonHeight};"></div>`)
+
+            window.dragon = OpenSeadragon({
+                id:                     "tap-dragon",
+                prefixUrl:              `${window.rootPath}js/openseadragon/images/`,
+                preserveViewport:       false,
+                visibilityRatio:        1,
+                minZoomLevel:           .25,
+                maxZoomLevel:           15,
+                defaultZoomLevel:       0,
+                homeFillsViewer:        false,
+                showRotationControl:    true,
+                tileSources:            tileSources,
+                sequenceMode:           true,
+                showReferenceStrip:     tileSources.length > 1,
+                referenceStripScroll:   'horizontal',
+            })
+        }
+
+        // each value links to the ephemera database, filtered by it
+        let filterLink = (facet, value, label) => `<a href="${window.rootPath}dwg/ephemera/?facet=${facet}&value=${encodeURIComponent(value)}">${label}</a>`
+        let metadata = []
+
+        if (events.length) {
+            metadata.push(`<dt>${events.length > 1 ? 'Exhibits' : 'Exhibit'}:</dt><dd>${events.map(event => filterLink('exhibits', event.id, event.label)).join('<br />')}</dd>`)
+        }
+        if (artifact.agents && artifact.agents.length) {
+            metadata.push(`<dt>People:</dt><dd>${artifact.agents.map(agent => filterLink('agents', agent.id, agent.label)).join('<br />')}</dd>`)
+        }
+        if (artifact.collection) metadata.push(`<dt>Collection:</dt><dd>${filterLink('collections', artifact.collection.id, artifact.collection.label)}</dd>`)
+        if (artifact.media_type) metadata.push(`<dt>Media Type:</dt><dd>${filterLink('media', artifact.media_type.id, artifact.media_type.label)}</dd>`)
+        if (artifact.themes && artifact.themes.length) {
+            metadata.push(`<dt>Themes:</dt><dd>${artifact.themes.map(theme => filterLink('themes', theme.id, theme.label)).join('<br />')}</dd>`)
+        }
+        if (artifact.year) metadata.push(`<dt>Year:</dt><dd>${filterLink('years', artifact.year, artifact.year)}</dd>`)
+
+        appendToEl(metadataDiv, `<dl>${metadata.join('\n')}</dl>`)
+        metadataDiv.style.maxHeight = dragonHeight
+        metadataDiv.style.overflowY = 'auto'
+    }
+
+    function showNotFound() {
+        appendToEl(getEl('tap-artdetail-metadata-div'), `
+            <h1 class="pt-0">Item not found</h1>
+            <p class="mt-3">Sorry, we couldn't find that item. Try browsing the <a href="${window.rootPath}dwg/ephemera/">Art &amp; Ephemera Database</a>.</p>
+        `)
+    }
+</script>
+</body>
+</html>

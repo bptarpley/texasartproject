@@ -126,7 +126,7 @@ function renderArtworkMetadata(artwork, style='vertical', filterLinks=true) {
 
         let prizes = []
         artwork.prizes.forEach(prize => {
-            prizes.push(`<p><i>${prize.name}</i> awarded at ${prize.exhibit}</p>`)
+            prizes.push(`<p><i>${prize.name}</i>${prize.exhibit ? ` awarded at ${prize.exhibit}` : ''}</p>`)
         })
 
         return `
@@ -138,12 +138,12 @@ function renderArtworkMetadata(artwork, style='vertical', filterLinks=true) {
                   ${artwork.location ? `<dt>Depicted Place:</dt><dd>${filterLinks ? `<a href="${window.rootPath}schiwetz/?place=${artwork.location.id}">` : ''}${artwork.location.label}${filterLinks ? `</a>` : ''}</dd>` : ''}
                   ${artwork.edition ? `<dt>Edition</dt><dd>${artwork.edition}</dd>` : ''}
                   ${tags.join('\n')}
-                  ${artwork.medium ? `<dt>Medium:</dt><dd>${filterLinks ? `<a href="${window.rootPath}schiwetz/?medium=${artwork.medium}">` : ''}${artwork.medium}${filterLinks ? '</a>' : ''}</dd>` : ''}
-                  ${artwork.surface ? `<dt>Surface:</dt><dd>${filterLinks ? `<a href="${window.rootPath}schiwetz/?surface=${artwork.surface}">` : ''}${artwork.surface}${filterLinks ? '</a>' : ''}</dd>` : ''}
+                  ${artwork.medium ? `<dt>Medium:</dt><dd>${filterLinks ? `<a href="${window.rootPath}schiwetz/?medium=${encodeURIComponent(artwork.medium)}">` : ''}${artwork.medium}${filterLinks ? '</a>' : ''}</dd>` : ''}
+                  ${artwork.surface ? `<dt>Surface:</dt><dd>${filterLinks ? `<a href="${window.rootPath}schiwetz/?surface=${encodeURIComponent(artwork.surface)}">` : ''}${artwork.surface}${filterLinks ? '</a>' : ''}</dd>` : ''}
                   ${artwork.size_inches ? `<dt>Size:</dt><dd>${artwork.size_inches}</dd>` : ''}
                   ${artwork.inscriptions ? `<dt>Inscriptions</dt><dd>${artwork.inscriptions}</dd>` : ''}
-                  ${artwork.collection && !artwork.anonymize_collector ? `<dt>Collection:</dt><dd>${filterLinks ? `<a href="${window.rootPath}schiwetz/?collection=${artwork.collection.id}">` : ''}${artwork.collection.label}${filterLinks ? '</a>' : ''}</dd>` : ''}
-                  ${artwork.anonymize_collector ? `<dt>Collection:</dt><dd>${filterLinks ? `<a href="${window.rootPath}schiwetz/?collection=Private Collection">` : ''}Private Collection${filterLinks ? '</a>' : ''}</dd>` : ''}
+                  ${artwork.collection && !artwork.anonymize_collector ? `<dt>Collection:</dt><dd>${filterLinks ? `<a href="${window.rootPath}schiwetz/?collection=${artwork.collection.label.startsWith('Private Collection') ? 'Private%20Collection' : artwork.collection.id}">` : ''}${artwork.collection.label}${filterLinks ? '</a>' : ''}</dd>` : ''}
+                  ${artwork.anonymize_collector ? `<dt>Collection:</dt><dd>${filterLinks ? `<a href="${window.rootPath}schiwetz/?collection=Private%20Collection">` : ''}Private Collection${filterLinks ? '</a>' : ''}</dd>` : ''}
                 </dl>
                 
                 ${exhibits.length ? `

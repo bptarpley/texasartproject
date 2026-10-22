@@ -27,97 +27,113 @@
 <script src="../js/templates/global.js"></script>
 <script src="../js/corpora.js"></script>
 <script src="../js/config.js"></script>
-<script src="../js/schiwetz.js"></script>
 
 <!-- MAIN JS ENTRYPOINT -->
 <script language="javascript">
-    window.corpus = null
     window.rootPath = '../'
     window.getParams = new URLSearchParams(window.location.search)
+    window.artworkID = window.getParams.get('id')
+    window.artwork = null
+    window.dragon = null
 
     // MAIN ENTRY POINT
     document.addEventListener('DOMContentLoaded', function() {
         prependToEl(getEl('tap-header-div'), siteHeaderTemplate({rootPath: window.rootPath}))
         appendToEl(getEl('tap-footer-div'), siteFooterTemplate({rootPath: window.rootPath}))
 
-        getSchiwetzCorpus(
-            (corpus) => {
-                window.corpus = corpus
-                window.showLinks = window.getParams.get('filters') !== 'off'
+        // adjust main row depending on screen size
+        if (window.innerWidth <= 767) getEl('tap-artdetail-main-row').classList.add('flex-column-reverse')
 
-                // adjust main row depending on screen size
-                if (window.innerWidth <= 767) getEl('tap-artdetail-main-row').classList.add('flex-column-reverse')
+        if (!window.artworkID) {
+            showNotFound()
+            return
+        }
 
-                // get artwork id
-                window.artworkID = window.getParams.get('id')
-
-                // grab all the metadata for our artwork
-                if (window.artworkID) {
-                    window.artwork = window.corpus.getContent('ArtWork', window.artworkID)
-                    let metadataDiv = getEl('tap-artdetail-metadata-div')
-                    let imageDiv = getEl('tap-artdetail-image-div')
-
-                    // exhibitions
-                    window.artwork.exhibits = window.corpus.getAssociatedContents('ArtWork', window.artworkID, 'Exhibition')
-
-                    // prizes
-                    window.artwork.prizes = window.corpus.getAssociatedContents('ArtWork', window.artworkID, 'Prize')
-
-                    // display metadata
-                    appendToEl(metadataDiv, `
-                        <div class="tap-artgrid-metadata p-0 m-0">
-                            <h1 class="pt-0">${artwork.title}</h1>
-                            ${renderArtworkMetadata(artwork, 'full', window.showLinks)}
-                        </div>
-                    `)
-
-                    // display image
-                    if (artwork.display_restriction && ['Thumbnail Only', 'No Image'].includes(artwork.display_restriction.label)) {
-                        let artRegion = null
-                        if (artwork.hasOwnProperty('featured_region_x') && artwork.featured_region_x) {
-                            artRegion = `${artwork.featured_region_x},${artwork.featured_region_y},${artwork.featured_region_width},${artwork.featured_region_width}`;
-                        }
-                        appendToEl(imageDiv, `
-                            <img
-                                id="tap-artgrid-img-${artwork.id}"
-                                src="${window.rootPath}img/image-loading.svg"
-                                class="tap-artgrid-img img-responsive mt-4"
-                                data-artwork-id="${artwork.id}"
-                                data-iiif-identifier="${artwork.iiif_uri}"
-                                data-display-restriction="${artwork.display_restriction ? artwork.display_restriction.label : 'none'}"
-                                ${artRegion ? `data-region="${artRegion}"` : ''}
-                                style="display: block; margin: auto;"
-                            />
-                            <div class="text-center text-muted mt-2">The display of this image has been restricted.</div>
-                        `)
-                        let img = getEl(`tap-artgrid-img-${artwork.id}`)
-                        injectImageInfo(img, function() {
-                            renderImage(img, 200, true)
-                        })
-                    } else {
-                        let dragonHeight = `${imageDiv.clientHeight - 40}px`
-                        if (window.innerWidth <= 767) dragonHeight = '50vh';
-                        appendToEl(imageDiv, `
-                            <div id="tap-dragon" class="w-100" style="height: ${dragonHeight};"></div>
-                        `)
-
-                        window.dragon = OpenSeadragon({
-                            id:                 "tap-dragon",
-                            prefixUrl:          `${window.rootPath}js/openseadragon/images/`,
-                            preserveViewport:   false,
-                            visibilityRatio:    1,
-                            minZoomLevel:       null,//.50,
-                            maxZoomLevel:       15,
-                            defaultZoomLevel:   0,
-                            //homeFillsViewer:    true,
-                            showRotationControl: true,
-                            tileSources:   [artwork.iiif_uri],
-                        })
-                    }
-                }
-            }
-        )
+        let api = `${TAP.corporaHost}/api/corpus/${TAP.corpusID}`
+        Promise.all([
+            fetch(`${api}/ArtWork/${window.artworkID}/`).then(res => res.json()),
+            fetch(`${api}/Exhibition/?f_artwork.id=${window.artworkID}&only=event.id,event.label&page-size=100`).then(res => res.json()),
+            fetch(`${api}/Prize/?f_artwork.id=${window.artworkID}&only=name,event.label&page-size=100`).then(res => res.json()),
+        ])
+            .then(([artwork, exhibitions, prizes]) => {
+                artwork.exhibits = exhibitions.records.map(exhibition => exhibition.event)
+                artwork.prizes = prizes.records.map(prize => ({
+                    name: prize.name,
+                    exhibit: prize.event ? prize.event.label : ''
+                }))
+                window.artwork = artwork
+                showArtwork(artwork)
+            })
+            // Corpora responds to unknown IDs with an HTML error page
+            .catch(() => showNotFound())
     })
+
+    function showArtwork(artwork) {
+        let metadataDiv = getEl('tap-artdetail-metadata-div')
+        let imageDiv = getEl('tap-artdetail-image-div')
+
+        // links filter the Schiwetz gallery, so they only make sense for Schiwetz artworks
+        let showLinks = window.getParams.get('filters') !== 'off'
+            && artwork.project && artwork.project.id === TAP.projects.schiwetz
+
+        document.title = `${artwork.title} | Texas Art Project`
+
+        appendToEl(metadataDiv, `
+            <div class="tap-artgrid-metadata p-0 m-0">
+                <h1 class="pt-0">${artwork.title}</h1>
+                ${renderArtworkMetadata(artwork, 'full', showLinks)}
+            </div>
+        `)
+
+        if (artwork.display_restriction && ['Thumbnail Only', 'No Image'].includes(artwork.display_restriction.label)) {
+            let artRegion = null
+            if (artwork.hasOwnProperty('featured_region_x') && artwork.featured_region_x) {
+                artRegion = `${artwork.featured_region_x},${artwork.featured_region_y},${artwork.featured_region_width},${artwork.featured_region_width}`
+            }
+            appendToEl(imageDiv, `
+                <img
+                    id="tap-artgrid-img-${artwork.id}"
+                    src="${window.rootPath}img/image-loading.svg"
+                    class="tap-artgrid-img img-responsive mt-4"
+                    data-artwork-id="${artwork.id}"
+                    data-iiif-identifier="${artwork.iiif_uri}"
+                    data-display-restriction="${artwork.display_restriction.label}"
+                    ${artRegion ? `data-region="${artRegion}"` : ''}
+                    style="display: block; margin: auto;"
+                />
+                <div class="text-center text-muted mt-2">The display of this image has been restricted.</div>
+            `)
+            let img = getEl(`tap-artgrid-img-${artwork.id}`)
+            injectImageInfo(img, function() {
+                renderImage(img, 200, true)
+            })
+        } else {
+            let dragonHeight = `${imageDiv.clientHeight - 40}px`
+            if (window.innerWidth <= 767) dragonHeight = '50vh'
+            appendToEl(imageDiv, `
+                <div id="tap-dragon" class="w-100" style="height: ${dragonHeight};"></div>
+            `)
+
+            window.dragon = OpenSeadragon({
+                id:                 "tap-dragon",
+                prefixUrl:          `${window.rootPath}js/openseadragon/images/`,
+                preserveViewport:   false,
+                visibilityRatio:    1,
+                minZoomLevel:       null,
+                maxZoomLevel:       15,
+                defaultZoomLevel:   0,
+                showRotationControl: true,
+                tileSources:   [artwork.iiif_uri],
+            })
+        }
+    }
+
+    function showNotFound() {
+        appendToEl(getEl('tap-artdetail-metadata-div'), `
+            <h1 class="pt-0">Artwork not found</h1>
+            <p class="mt-3">Sorry, we couldn't find that artwork. Try browsing the <a href="${window.rootPath}schiwetz/">Schiwetz gallery</a>.</p>
+        `)
+    }
 </script>
 </body>
 </html>

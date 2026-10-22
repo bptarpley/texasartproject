@@ -1,218 +1,8 @@
-#tap-ephemera-grid {
-    transition: 1000ms;
-    display: flex;
-    flex-wrap: wrap;
-    flex-direction: row;
-    align-content: flex-start;
-}
+/******************************************
+    DALLAS WOMEN'S GALLERY TIMELINE
+    (ported from the WordPress plugin's dwg.css; its other rules duplicated tap.css)
+/*****************************************/
 
-.tap-artgrid-displayrow {
-    height: 600px;
-    transition: all 1s linear;
-    margin-right: 10px!important;
-    margin-bottom: 10px;
-}
-
-.tap-artgrid-displayrow.collapsed {
-    height: 0px;
-}
-
-.tap-artgrid-cell {
-    padding: 0!important;
-    padding-right: 10px!important;
-    padding-bottom: 10px!important;
-    transition: all 1s linear;
-}
-
-.tap-artgrid-img {
-    transition: all 1s linear;
-}
-
-.tap-artgrid-cell .tap-artgrid-img:hover {
-    filter: brightness(1.5);
-    cursor: pointer;
-}
-
-.tap-artgrid-metadata {
-    animation: fadeIn 3s;
-    -webkit-animation: fadeIn 3s;
-    -moz-animation: fadeIn 3s;
-    -o-animation: fadeIn 3s;
-    -ms-animation: fadeIn 3s;
-}
-
-@keyframes fadeIn {
-    0% { opacity: 0; }
-    100% { opacity: 1; }
-}
-
-@-moz-keyframes fadeIn {
-    0% { opacity: 0; }
-    100% { opacity: 1; }
-}
-
-@-webkit-keyframes fadeIn {
-    0% { opacity: 0; }
-    100% { opacity: 1; }
-}
-
-@-o-keyframes fadeIn {
-    0% { opacity: 0; }
-    100% { opacity: 1; }
-}
-
-@-ms-keyframes fadeIn {
-    0% { opacity: 0; }
-    100% { opacity: 1; }
-}
-
-dl {
-    display: grid;
-    grid-template-columns: 36% auto;
-}
-
-dt {
-    grid-column: 1;
-    text-align: right;
-    font-size: 16px;
-}
-
-dd {
-    grid-column: 2;
-    padding-left: 10px!important;
-    font-size: 16px;
-}
-
-dd.below {
-    grid-column: 1 / 3;
-}
-
-#tap-artmenu {
-    background-color: #F4F4F4;
-    padding-left: 20px!important;
-    padding-right: 20px!important;
-    flex-direction: column;
-    position: sticky;
-    top: 0;
-    overflow-y: scroll;
-    max-height: 100vh;
-    min-height: 100vh;
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none;  /* Internet Explorer 10+ */
-}
-
-@media (max-width: 767px) {
-    #tap-artmenu {
-        position: inherit;
-        top: unset;
-        overflow-y: unset;
-        max-height: unset;
-        min-height: unset;
-        padding-bottom: 20px;
-    }
-}
-
-#tap-artmenu::-webkit-scrollbar { /* WebKit */
-    width: 0;
-    height: 0;
-}
-
-.tap-menu-heading {
-    font-style: normal!important;
-    margin-bottom: 5px;
-}
-
-.tap-artmenu-list[open] > summary {
-    margin-bottom: 5px;
-}
-
-.tap-artmenu-list-item {
-    padding-left: 1em;
-    text-indent: -1em;
-    font-size: smaller;
-    margin-bottom: 5px;
-}
-
-.tap-artmenu-active-filter {
-    display: block;
-    background-color: #008DAB;
-    color: white;
-    font-weight: normal!important;
-    padding: 5px!important;
-}
-
-.tap-artmenu-active-filter-label {
-    max-width: 250px;
-    text-overflow: ellipsis;
-    text-overflow: ellipsis;
-    display: inline-block;
-    vertical-align: middle;
-    overflow: hidden;
-}
-
-.tap-artmenu-active-filter-delete-button {
-    cursor: pointer;
-    display: inline-block;
-    vertical-align: middle;
-}
-
-details > summary {
-    list-style: none;
-}
-details > summary::-webkit-details-marker {
-    display: none;
-}
-
-details > summary:hover {
-    color: #008DAB;
-}
-
-summary > h2 {
-    display: inline;
-}
-
-details > summary:before {
-    font-family: "dashicons";
-    content: "\f139";
-}
-
-details[open] > summary:before {
-    font-family: "dashicons";
-    content: "\f140";
-}
-
-.tap-artmenu-list.empty > summary {
-    color: #A1A1A1;
-    margin-left: 20px;
-}
-.tap-artmenu-list.empty > summary:before {
-    content: ''
-}
-
-details ul {
-    list-style-type: none;
-}
-
-details ul li {
-    cursor: pointer;
-}
-
-details ul li:hover {
-    color: #008DAB;
-}
-
-/* MODAL STYLING */
-.modal-dialog {
-    max-width: unset;
-    width: 90vw;
-}
-
-.modal-content {
-    height: 90vh;
-}
-
-
-/* TIMELINE STYLING */
 #tap-ephemera-timeline {
     display: flex;
     flex-direction: column;
@@ -243,6 +33,10 @@ details ul li:hover {
 }
 .ephemera-timeline-filter {
     font-size: 16px;
+}
+.ephemera-timeline-filter-clear, .ephemera-timeline-filter-clear:hover {
+    color: #59554D !important;
+    text-decoration: none !important;
 }
 
 #ephemera-timeline-top-bar-info-container {
@@ -298,6 +92,12 @@ details ul li:hover {
 
 .ephemera-timeline-event.beneath-header {
     margin-top: 0;
+}
+
+/* when jumping to a year, land the event just below the sticky top bar and gallery header (40px each). the
+   timeline's event observer ignores this same strip, so events hidden beneath it don't count as visible */
+.ephemera-timeline-event {
+    scroll-margin-top: 80px;
 }
 
 .ephemera-timeline-event-header-artists-container {

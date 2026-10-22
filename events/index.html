@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Events | Texas Art Project</title>
+    <link rel="stylesheet" href="../css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://use.typekit.net/qbi7knm.css">
+    <link rel="stylesheet" href="../css/tap.css">
+</head>
+<body>
+<div id="tap-header-div"></div>
+
+<div class="container">
+    <img class="tap-header-image" src="../img/events.png" alt="Events" />
+</div>
+
+<div class="container mb-5">
+    <div class="row g-4">
+    <div class="col-md-4"><div style="background-color:#f2f2f2" class="h-100 p-4">
+    <h2 class="text-end multi-line">College Station Event<br>Tuesday, November 4, 2025</h2>
+
+    <h3 class="text-end multi-line">Rudder Forum &amp; Stark Galleries<br>Texas A&amp;M University</h3>
+    </div></div>
+
+    <div class="col-md-8 p-4">
+    <p>This event marks the public launch of the DWG Project’s web resources and video oral histories for the Texas A&amp;M community and region. The program celebrates the artistic legacy of the Dallas Women’s Co-op (later DW Gallery; DWG) for art students, art educators, and the local arts community. </p>
+
+    <p><strong>Program</strong></p>
+
+    <p>5:30     opening remarks<br>5:40     website demo<br>5:55     video oral history highlight reel<br>6:10     DWG artist roundtable discussion<br>6:55     closing remarks<br>7:00     reception at J Wayne Stark Galleries (adjacent building)</p>
+
+    <p>RSVPs appreciated by Friday, November 1 to <a href="mailto:contact@texasartproject.org">contact@texasartproject.org</a>.<br></p>
+
+    <figure><img loading="lazy" width="1024" height="526" src="../uploads/2025/10/DWGMAP-1024x526.jpg" /></figure>
+
+    <p><strong>Parking at Texas A&amp;M<br></strong>There are two visitor parking garages near to the venue: <br>&#8211; <a href="https://transport.tamu.edu/parkingmap//tsmap.htm?map=vis&cit=20300" target="_blank" rel="noreferrer noopener">University Center Garage (UCG)</a> (0.2 miles from venue)<br>&#8211; <a href="https://transport.tamu.edu/parkingmap//tsmap.htm?map=vis&cit=20600" target="_blank" rel="noreferrer noopener">Gene Stallings Blvd Garage (SBG)</a> (0.3 miles from venue)<br>After 5pm, visitor parking for 3–4 hrs is $5.50. If this is cost prohibitive, please contact Tianna (contact@texasartproject.org).</p>
+
+    <p>This event is sponsored by the Melbern G. Glasscock Center for Humanities Research, the University Art Galleries, and the College of Performance, Visualization &amp; Fine Arts, Texas A&amp;M University. </p>
+    </div>
+    </div>
+
+    <div style="height:50px" aria-hidden="true"></div>
+
+    <div class="row g-4">
+    <div class="col-md-4"><div style="background-color:#f2f2f2" class="h-100 p-4">
+    <h2 class="text-end multi-line">Dallas Event<br>Thursday, November 6, 2025</h2>
+
+    <h3 class="text-end multi-line">Hamon Arts Library, Reading Room<br>Southern Methodist University</h3>
+    </div></div>
+
+    <div class="col-md-8 p-4">
+    <p>This event marks the public launch of the DWG Project web resources and video oral histories for the DFW community and region . The program celebrates the artistic legacy of the Dallas Women’s Co-op (later DW Gallery; DWG) for archivists, curators, gallerists, and collectors. </p>
+
+    <p><em><span style="text-decoration: underline">Note: this event coincides with an exhibition of DWG ephemera at Hamon Arts Library, curated by DWG artists</span>.</em> Get a glimpse of the DW Gallery’s critical role in the Dallas art scene during the 70s and 80s. Exhibition postcards, newspaper articles, correspondences, and other ephemera tell the tale of this women-led co-op.</p>
+
+    <p>5:30     opening remarks<br>5:40     website demo<br>5:55     4 x 5-min lightning talks<br>6:15     break/roundtable set-up<br>6:30     DWG artist roundtable discussion<br>7:00      reception begins, with light bites and drinks</p>
+
+    <p>RSVPs appreciated by Monday, November 3 to <a href="mailto:contact@texasartproject.org">contact@texasartproject.org</a>.</p>
+
+    <p><strong>Parking at SMU</strong><br><a href="https://www.smu.edu/businessfinance/campusservices/parkingandidcardservices/information/visitors" target="_blank" rel="noreferrer noopener">Visitor Parking</a> at SMU is available near the Hamon Arts Library at:<br>&#8211; Binkley Parking Garage ($12) off Binkley Ave<br>&#8211; Meadows Visitor Parking (free) off Schlegel <br>Map excerpt below shows Hamon with an orange asterisk and nearby parking with blue asterisks. Full SMU parking map available <a href="https://www.smu.edu/-/media/site/businessfinance/campus-services/parkingandcardservices/parking-map-25-26.pdf" target="_blank" rel="noreferrer noopener">here</a>, with visitor parking highlighted in light blue.</p>
+
+    <figure><img loading="lazy" width="465" height="403" src="../uploads/2025/10/visitor-parking.png" /></figure>
+
+    </div>
+    </div>
+</div>
+
+<div id="tap-footer-div"></div>
+
+<!-- JS INCLUDES -->
+<script src="../js/bootstrap.bundle.min.js"></script>
+<script src="../js/templates/global.js"></script>
+<script src="../js/corpora.js"></script>
+
+<!-- MAIN JS ENTRYPOINT -->
+<script language="javascript">
+    window.rootPath = '../'
+
+    // MAIN ENTRY POINT
+    document.addEventListener('DOMContentLoaded', function() {
+        prependToEl(getEl('tap-header-div'), siteHeaderTemplate({rootPath: window.rootPath}))
+        appendToEl(getEl('tap-footer-div'), siteFooterTemplate({rootPath: window.rootPath}))
+    })
+</script>
+</body>
+</html>

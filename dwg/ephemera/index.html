@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Art &amp; Ephemera Database | Texas Art Project</title>
+    <link rel="stylesheet" href="../../css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://use.typekit.net/qbi7knm.css">
+    <link rel="stylesheet" href="../../css/dashicons.css">
+    <link rel="stylesheet" href="../../css/tap.css">
+</head>
+<body>
+<div id="tap-header-div"></div>
+
+<div class="container mb-5">
+    <div class="row">
+        <div id="tap-ephemera-menu" class="col-md-4 pt-3">
+            <div id="tap-artmenu">
+                <div id="tap-artmenu-active-filters"></div>
+                <h2 class="tap-menu-heading">Search DWG Ephemera</h2>
+                <div class="form-group">
+                    <label for="tap-artmenu-search-box" class="visually-hidden">Search</label>
+                    <input id="tap-artmenu-search-box" type="text" class="form-control form-control-sm" placeholder="Type here">
+                </div>
+
+                <h2 id="tap-artmenu-filter-heading" class="tap-menu-heading mt-3">Filter</h2>
+
+                <details class="tap-artmenu-list">
+                    <summary>Year</summary>
+                    <ul id="tap-artmenu-years-list"></ul>
+                </details>
+
+                <details class="tap-artmenu-list">
+                    <summary>People</summary>
+                    <ul id="tap-artmenu-agents-list"></ul>
+                </details>
+
+                <details class="tap-artmenu-list">
+                    <summary>Collection</summary>
+                    <ul id="tap-artmenu-collections-list"></ul>
+                </details>
+
+                <details class="tap-artmenu-list">
+                    <summary>Event</summary>
+                    <ul id="tap-artmenu-exhibits-list"></ul>
+                </details>
+
+                <details class="tap-artmenu-list">
+                    <summary>Media</summary>
+                    <ul id="tap-artmenu-media-list"></ul>
+                </details>
+
+                <details class="tap-artmenu-list">
+                    <summary>Theme</summary>
+                    <ul id="tap-artmenu-themes-list"></ul>
+                </details>
+            </div>
+        </div>
+
+        <div class="col-md-8 ps-md-2">
+            <div id="tap-ephemera-grid"></div>
+        </div>
+    </div>
+</div>
+
+<div id="tap-footer-div"></div>
+
+<!-- JS INCLUDES -->
+<script src="../../js/bootstrap.bundle.min.js"></script>
+<script src="../../js/templates/global.js"></script>
+<script src="../../js/corpora.js"></script>
+<script src="../../js/config.js"></script>
+<script src="../../js/artmenu.js"></script>
+<script src="../../js/dwg.js"></script>
+
+<!-- MAIN JS ENTRYPOINT -->
+<script language="javascript">
+    window.corpus = null
+    window.rootPath = '../../'
+    window.getParams = new URLSearchParams(window.location.search)
+    window.artMenu = null
+    window.ephemeraGrid = null
+
+    // MAIN ENTRY POINT
+    document.addEventListener('DOMContentLoaded', function() {
+        prependToEl(getEl('tap-header-div'), siteHeaderTemplate({rootPath: window.rootPath}))
+        appendToEl(getEl('tap-footer-div'), siteFooterTemplate({rootPath: window.rootPath}))
+
+        getDwgEphemeraCorpus((corpus) => {
+            window.corpus = corpus
+            window.artMenu = new ArtMenu(dwgFacets, showArtifacts, query => window.artMenu.searchFacetLabels(query))
+
+            let artifactKeys = collectEphemeraFacets(corpus, window.artMenu)
+            window.ephemeraGrid = new EphemeraGrid(getEl('tap-ephemera-grid'), corpus, artifactKeys)
+
+            window.artMenu.placeFacets()
+            window.artMenu.setupSearch()
+
+            // links from the ephemera detail page filter by a single facet, i.e. ?facet=agents&value=<id>
+            let facet = window.getParams.get('facet')
+            if (facet in dwgFacets) window.artMenu.applyFilter(facet, window.getParams.get('value'))
+
+            showArtifacts()
+        })
+    })
+
+    function showArtifacts() {
+        window.ephemeraGrid.show(window.artMenu.filterItems(window.ephemeraGrid.artifactKeys))
+
+        // the grid is long, so bring its top back into view when the results change
+        let gridTop = getEl('tap-ephemera-grid').getBoundingClientRect().top
+        if (gridTop < 0) getEl('tap-header-div').scrollIntoView({behavior: 'smooth'})
+    }
+</script>
+</body>
+</html>

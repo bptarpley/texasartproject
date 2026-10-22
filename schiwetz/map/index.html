@@ -14,6 +14,10 @@
 <body>
 <div id="tap-header-div"></div>
 
+<div class="container">
+    <img class="tap-header-image" src="../../img/map-timeline.png" alt="Map and Timeline" />
+</div>
+
 <div id="tap-artmap" class="container mb-5">
     <ul class="nav nav-tabs" id="tap-artmap-tabs" role="tablist">
         <li class="nav-item" role="presentation">
@@ -60,14 +64,7 @@
                             <input id="tap-artmenu-search-box" type="text" class="form-control form-control-sm" placeholder="Type here">
                         </div>
 
-                        <h2 class="tap-menu-heading mt-3">Filter</h2>
-
-                        <details class="tap-artmenu-list">
-                            <summary>Depicted Place</summary>
-                            <ul id="tap-artmenu-place-list">
-                            </ul>
-                        </details>
-
+                        <h2 id="tap-artmenu-filter-heading" class="tap-menu-heading mt-3">Filter</h2>
 
                         <details class="tap-artmenu-list">
                             <summary>Collection</summary>
@@ -170,6 +167,7 @@
 <script src="../../js/leaflet.markercluster.js?ver=7.1"></script>
 <script src="../../js/corpora.js"></script>
 <script src="../../js/config.js"></script>
+<script src="../../js/artmenu.js"></script>
 <script src="../../js/schiwetz.js"></script>
 
 <!-- MAIN JS ENTRYPOINT -->
@@ -188,6 +186,8 @@
     window.currentLocation = null
 
     let artSlider = getEl('tap-artslider')
+    const sliderMinYear = 1880
+    const sliderMaxYear = 1990
 
     // MAIN ENTRY POINT
     document.addEventListener('DOMContentLoaded', function() {
@@ -197,19 +197,17 @@
         getSchiwetzCorpus((corpus) => {
             window.corpus = corpus
             window.artMenu = new ArtMenu(
-                Object.keys(schiwetzFacetLabels).filter(category => category !== 'decade'),
-                populateMap
+                schiwetzFacets(Object.keys(schiwetzFacetLabels).filter(category => !['decade', 'place'].includes(category))),
+                populateMap,
+                query => searchSchiwetzArtworks(window.corpus, query)
             )
 
-            // adjust depending on screen size
-            if (window.innerWidth <= 767){
-                artSlider.setAttribute('marks-count', '6')
-                artSlider.setAttribute('marks-values-count', '6')
-            }
+            setupSlider()
+            setupTabs()
 
             collectSchiwetzFacets(window.corpus, window.artMenu)
             window.artMenu.placeFacets()
-            window.artMenu.setupSearch(window.corpus)
+            window.artMenu.setupSearch()
 
             L.Control.ZoomHome = L.Control.extend({
                 options: {
@@ -218,18 +216,18 @@
                 },
 
                 onAdd: function (map) {
-                    let home_button = L.DomUtil.create('button', 'leaflet-control-zoom-home')
-                    home_button.type = 'button'
-                    home_button.title = 'Zoom to Home'
-                    home_button.setAttribute('aria-label', 'Zoom to Home')
-                    home_button.innerHTML = '<span class="dashicons dashicons-admin-home"></span>'
+                    let homeButton = L.DomUtil.create('button', 'leaflet-control-zoom-home')
+                    homeButton.type = 'button'
+                    homeButton.title = 'Zoom to Home'
+                    homeButton.setAttribute('aria-label', 'Zoom to Home')
+                    homeButton.innerHTML = '<span class="dashicons dashicons-admin-home"></span>'
 
-                    L.DomEvent.on(home_button, 'click', () => {
+                    L.DomEvent.on(homeButton, 'click', () => {
                         this.zoomHome()
                     })
-                    L.DomEvent.on(home_button, 'mousedown click dblclick', L.DomEvent.stopPropagation)
+                    L.DomEvent.on(homeButton, 'mousedown click dblclick', L.DomEvent.stopPropagation)
 
-                    return home_button
+                    return homeButton
                 },
 
                 zoomHome: function () {
@@ -242,6 +240,75 @@
         })
     })
 
+    function setupSlider() {
+        let sliderTimer = null
+
+        // adjust depending on screen size
+        if (window.innerWidth <= 767){
+            artSlider.setAttribute('marks-count', '6')
+            artSlider.setAttribute('marks-values-count', '6')
+        }
+        artSlider.addCSS(`
+            .mark-value {
+                font-size: 12px;
+            }
+        `)
+
+        artSlider.addEventListener('change', () => {
+            clearTimeout(sliderTimer)
+            sliderTimer = setTimeout(() => {
+                let minYear = parseInt(artSlider.value1)
+                let maxYear = parseInt(artSlider.value2)
+
+                if (minYear > sliderMinYear || maxYear < sliderMaxYear) {
+                    let matchingArtworkIDs = new Set(
+                        window.corpus.getContents('ArtWork')
+                            .filter(artwork => artwork.year && artwork.year >= minYear && artwork.year <= maxYear)
+                            .map(artwork => artwork.id)
+                    )
+                    window.artMenu.setCustomFilter('year', `Year: ${minYear} – ${maxYear}`, matchingArtworkIDs, () => {
+                        artSlider.value1 = sliderMinYear
+                        artSlider.value2 = sliderMaxYear
+                    })
+                } else {
+                    window.artMenu.removeCustomFilter('year')
+                }
+            }, 1000)
+        })
+    }
+
+    function setupTabs() {
+        forElsMatching('#tap-artmap-tabs button[data-bs-toggle="tab"]', tabButton => {
+            tabButton.addEventListener('shown.bs.tab', (e) => {
+                // close popups while the previous tab is still active, since closing triggers returnToCurrentLocation
+                if (window.markerPopup) window.markerPopup.close()
+                if (window.exhibitPopup) window.exhibitPopup.close()
+
+                window.activeTab = e.target.id.replace('-tab', '')
+
+                // the menu, slider, and map credits are shared by both tabs, so move them into the active one
+                let activeMenuDiv = getEl(`tap-${window.activeTab}-artmenu-div`)
+                let activeMapDiv = getEl(`tap-${window.activeTab}-artmap-div`)
+                activeMenuDiv.appendChild(getEl('tap-artmenu'))
+                activeMapDiv.appendChild(artSlider)
+                activeMapDiv.appendChild(getEl('tap-artmap-attribution-div'))
+
+                if (window.activeTab === 'us' && !window.usMap) drawUsMap()
+                else populateMap()
+            })
+        })
+    }
+
+    function getActiveMap() {
+        return window.activeTab === 'us' ? window.usMap : window.texasMap
+    }
+
+    function returnToCurrentLocation() {
+        let loc = window.corpus.getContent('Place', window.currentLocation)
+        let activeMap = getActiveMap()
+        if (activeMap && loc && loc.coordinates) activeMap.flyTo([loc.coordinates[1], loc.coordinates[0]])
+    }
+
     function drawTexasMap() {
         fetch(`${window.rootPath}texas_fixed.json`)
             .then(response => response.json())
@@ -251,7 +318,7 @@
                         [25.90864446329127, -93.603515625]
                     ]
                     window.texasMap = L.map('tap-texas-artmap', {zoomSnap: 0.3})
-                    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+                    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png?key=cb1_2nwr_1_7941c81997287d52ecbe1587', {
                         maxZoom: 19,
                         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://cartodb.com/attributions">CartoDB</a>'
                     }).addTo(window.texasMap)
@@ -274,20 +341,80 @@
 
                     window.markerPopup = L.popup({maxHeight: 300})
                     window.exhibitPopup = L.popup({maxHeight: 300})
-                    window.texasMap.on('popupclose', e => {
-                        let loc = window.corpus.getContent('Place', window.currentLocation)
-                        window.texasMap.flyTo([loc.coordinates[1], loc.coordinates[0]])
-                    })
+                    window.texasMap.on('popupclose', returnToCurrentLocation)
 
                     populateMap()
                 }
             )
     }
 
-    function populateMap(matchingArtworkIDs=null) {
+    function drawUsMap() {
+        fetch(`${window.rootPath}usa.json`)
+            .then(response => response.json())
+            .then(usaShapes => {
+                let usBounds = [
+                    [49.12081854517537, -125.84908980237064],
+                    [24.581804314541866, -65.87274522302415]
+                ]
+                window.usMap = L.map('tap-us-artmap', {zoomSnap: 0.3, attributionControl: false})
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png?key=cb1_2nwr_1_7941c81997287d52ecbe1587', {
+                    maxZoom: 19
+                }).addTo(window.usMap)
+                window.usMap.fitBounds(usBounds, {padding: [20, 20]})
+
+                new L.Control.ZoomHome({homeBounds: usBounds}).addTo(window.usMap)
+
+                // state abbreviations only show up once zoomed in far enough
+                let stateMarkers = new L.FeatureGroup()
+
+                usaShapes.forEach(stateShape => {
+                    let statePoly = L.geoJSON(stateShape, {
+                        fillColor: '#A5B9C4',
+                        fill: true,
+                        fillOpacity: 1,
+                        color: '#FFFFFF',
+                        weight: 1,
+                        interactive: false
+                    })
+                    statePoly.addTo(window.usMap)
+                    statePoly.bringToFront()
+
+                    if (stateShape.properties.abbreviation) {
+                        let stateCenter = statePoly.getBounds().getCenter()
+                        if (stateShape.properties.label_coords) stateCenter = stateShape.properties.label_coords
+
+                        stateMarkers.addLayer(new L.Marker(
+                            stateCenter,
+                            {
+                                icon: new L.DivIcon({
+                                    className: 'tap-artmap-marker',
+                                    iconSize: [20, 20],
+                                    iconAnchor: [10, 10],
+                                    html: `
+                                        <span class="tap-artmap-state-abbreviation">
+                                          ${stateShape.properties.abbreviation}
+                                        </span>
+                                    `
+                                })
+                            }
+                        ))
+                    }
+                })
+
+                window.usMap.on('zoomend', () => {
+                    if (window.usMap.getZoom() < 5) window.usMap.removeLayer(stateMarkers)
+                    else window.usMap.addLayer(stateMarkers)
+                })
+                window.usMap.on('popupclose', returnToCurrentLocation)
+
+                populateMap()
+            })
+    }
+
+    function populateMap() {
         if (window.markerCluster) window.markerCluster.remove()
 
-        window.visibleArtworks = window.artMenu.filterArtworks(window.corpus.schema['ArtWork'].ids, matchingArtworkIDs)
+        window.visibleArtworks = window.artMenu.filterItems(window.corpus.schema['ArtWork'].ids)
 
         // set up marker cluster
         window.markerCluster = L.markerClusterGroup({
@@ -387,7 +514,7 @@
             }
         })
 
-        if (window.activeTab === 'texas') window.texasMap.addLayer(window.markerCluster)
+        getActiveMap().addLayer(window.markerCluster)
     }
 
     function displayMetadata(locationID) {
@@ -436,13 +563,10 @@
 
         meta += `</div>`
 
-        let activeMap = window.texasMap
-        if (window.activeTab === 'us') activeMap = window.usMap
-
         window.markerPopup
             .setLatLng([location.coordinates[1], location.coordinates[0]])
             .setContent(meta)
-            .openOn(activeMap)
+            .openOn(getActiveMap())
 
         let popupMetadataPane = getEl(`tap-artmap-metadata-popup`)
         locationArtworks.forEach(artwork => {
@@ -455,7 +579,6 @@
 
     function displayExhibit(exhibitID) {
         let ex = window.corpus.getContent('Event', exhibitID)
-        console.log(ex)
         if (ex) {
             let locationID = ex.location.id
             let meta = `
@@ -510,13 +633,10 @@
 
             meta += `</div>`
 
-            let activeMap = window.texasMap
-            if (window.activeTab === 'us') activeMap = window.usMap
-
             window.exhibitPopup
-                .setLatLng(ex.location.coordinates)
+                .setLatLng([ex.location.coordinates[1], ex.location.coordinates[0]])
                 .setContent(meta)
-                .openOn(activeMap)
+                .openOn(getActiveMap())
 
             let popupMetadataPane = getEl(`tap-artmap-metadata-popup`)
             exArtworks.forEach(artwork => {

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Contact | Texas Art Project</title>
+    <link rel="stylesheet" href="../css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://use.typekit.net/qbi7knm.css">
+    <link rel="stylesheet" href="../css/tap.css">
+</head>
+<body>
+<div id="tap-header-div"></div>
+
+<div class="container">
+    <img class="tap-header-image" src="../img/contact-us.png" alt="Contact Us" />
+</div>
+
+<div class="container mb-5">
+    <div class="row g-4">
+    <div class="col-md-4"><div style="background-color:#f2f2f2" class="h-100 p-4">
+    <h2>For inquiries about the life and work of Buck Schiwetz:</h2>
+    </div></div>
+
+    <div class="col-md-8 p-4">
+    <p>Linda Reaves: <a href="mailto:linda.reaves@sbcglobal.net">linda.reaves@sbcglobal.net</a><br>William Reaves: <a href="mailto:william-reaves@sbcglobal.net">william-reaves@sbcglobal.net</a></p>
+
+    <p>The Schiwetz Web Companion will continue to grow, with regular releases of new artworks to the site.</p>
+    </div>
+    </div>
+
+    <div style="height:50px" aria-hidden="true"></div>
+
+    <div class="row g-4">
+    <div class="col-md-4"><div style="background-color:#f2f2f2" class="h-100 p-4">
+    <h2>Texas Art Project digital humanities initiatives (texasartproject.org) are coordinated by:</h2>
+    </div></div>
+
+    <div class="col-md-8 p-4">
+    <p>Dr. Tianna Uchacz<br>Assistant Professor, History of Art and Craft Technology<br>College of Performance, Visualization &amp; Fine Arts<br>4240 TAMU<br>College Station, TX&nbsp;77843<br><a href="mailto:thu@tamu.edu" target="_blank" rel="noreferrer noopener">thu@tamu.edu</a></p>
+
+    <p>&nbsp;New featured projects are coming soon to texasartproject.org. If you have a project on the history of Texas art that you would like to propose, please get in touch.</p>
+
+    <p>&nbsp;To support Texas Art Project student research projects and digital humanities initiatives, please contact&nbsp;<a href="mailto:flewis@txamfoundation.com">Felicia Lewis</a>&nbsp;at the Texas A&amp;M Foundation or donate directly to the “Texas Art History Excellence Fund” at the Foundation’s&nbsp;<a href="https://www.txamfoundation.com/give.aspx">Online Giving</a>&nbsp;portal.</p>
+    </div>
+    </div>
+
+    <div style="height:50px" aria-hidden="true"></div>
+
+    <div class="row g-4">
+    <div class="col-md-4"><div style="background-color:#f2f2f2" class="h-100 p-4">
+    <h2>Texas Art Project exhibitions (J. Wayne Stark Galleries) are coordinated by:</h2>
+    </div></div>
+
+    <div class="col-md-8 p-4">
+    <p>John Spriggins<br>Director, Texas A&amp;M University Art Galleries<br>Memorial Student Center (MSC)<br>275 Joe Routt Blvd<br>College Station, TX 77843<br><a href="mailto:j.spriggins@tamu.edu">j.spriggins@tamu.edu</a></p>
+
+    <p>&nbsp;To support Texas Art Project exhibitions and programming, please contact&nbsp;<a href="https://www.txamfoundation.com/contact-us/team-bio.aspx?id=43">Reagan Chessher</a>&nbsp;at the Texas A&amp;M Foundation.</p>
+    </div>
+    </div>
+</div>
+
+<div id="tap-footer-div"></div>
+
+<!-- JS INCLUDES -->
+<script src="../js/bootstrap.bundle.min.js"></script>
+<script src="../js/templates/global.js"></script>
+<script src="../js/corpora.js"></script>
+
+<!-- MAIN JS ENTRYPOINT -->
+<script language="javascript">
+    window.rootPath = '../'
+
+    // MAIN ENTRY POINT
+    document.addEventListener('DOMContentLoaded', function() {
+        prependToEl(getEl('tap-header-div'), siteHeaderTemplate({rootPath: window.rootPath}))
+        appendToEl(getEl('tap-footer-div'), siteFooterTemplate({rootPath: window.rootPath}))
+    })
+</script>
+</body>
+</html>

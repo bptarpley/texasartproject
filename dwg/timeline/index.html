@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Interactive Timeline | Texas Art Project</title>
+    <link rel="stylesheet" href="../../css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://use.typekit.net/qbi7knm.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap">
+    <link rel="stylesheet" href="../../css/dashicons.css">
+    <link rel="stylesheet" href="../../css/tap.css">
+    <link rel="stylesheet" href="../../css/dwg.css">
+</head>
+<body>
+<div id="tap-header-div"></div>
+
+<div id="tap-ephemera-timeline" class="tap-body"></div>
+
+<div id="tap-footer-div"></div>
+
+<!-- JS INCLUDES -->
+<script src="../../js/bootstrap.bundle.min.js"></script>
+<script src="../../js/templates/global.js"></script>
+<script src="../../js/corpora.js"></script>
+<script src="../../js/config.js"></script>
+<script src="../../js/dwg-timeline.js"></script>
+
+<!-- MAIN JS ENTRYPOINT -->
+<script language="javascript">
+    window.rootPath = '../../'
+    window.timeline = null
+
+    // MAIN ENTRY POINT
+    document.addEventListener('DOMContentLoaded', function() {
+        prependToEl(getEl('tap-header-div'), siteHeaderTemplate({rootPath: window.rootPath}))
+        appendToEl(getEl('tap-footer-div'), siteFooterTemplate({rootPath: window.rootPath}))
+
+        getDwgTimelineCorpus((corpus) => {
+            window.timeline = new EphemeraTimeline(getEl('tap-ephemera-timeline'), corpus)
+        })
+    })
+</script>
+</body>
+</html>
