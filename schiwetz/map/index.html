@@ -517,6 +517,17 @@
         getActiveMap().addLayer(window.markerCluster)
     }
 
+    // artwork images fill their card's body: the popup's width, less the card's borders and the body's padding.
+    // (measured from computed styles, since collapsed cards have no width of their own yet)
+    function popupImageWidth(popupMetadataPane) {
+        let cardBody = popupMetadataPane.querySelector('.card-body')
+        let bodyStyle = getComputedStyle(cardBody)
+        let cardStyle = getComputedStyle(cardBody.closest('.card'))
+        return popupMetadataPane.clientWidth
+            - parseFloat(bodyStyle.paddingLeft) - parseFloat(bodyStyle.paddingRight)
+            - parseFloat(cardStyle.borderLeftWidth) - parseFloat(cardStyle.borderRightWidth)
+    }
+
     function displayMetadata(locationID) {
         let location = window.corpus.getContent('Place', locationID)
         let meta = `<div class="accordion" id="tap-artmap-metadata-popup">`
@@ -572,7 +583,7 @@
         locationArtworks.forEach(artwork => {
             let img = getEl(`tap-artgrid-img-${artwork.id}`)
             injectImageInfo(img, () => {
-                renderImage(img, popupMetadataPane.clientWidth - 20, false)
+                renderImage(img, popupImageWidth(popupMetadataPane), false)
             })
         })
     }
@@ -642,7 +653,7 @@
             exArtworks.forEach(artwork => {
                 let img = getEl(`tap-artgrid-img-${artwork.id}`)
                 injectImageInfo(img, function () {
-                    renderImage(img, popupMetadataPane.clientWidth - 20, false)
+                    renderImage(img, popupImageWidth(popupMetadataPane), false)
                 })
             })
         }
