@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Texas Art Project</title>
+    <link rel="stylesheet" href="../css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://use.typekit.net/qbi7knm.css">
+    <link rel="stylesheet" href="../css/dashicons.css">
+    <link rel="stylesheet" href="../css/tap.css">
+</head>
+<body>
+<div id="tap-header-div"></div>
+
+<div id="tap-artwork-detail-div" class="container-fluid">
+    <div id="tap-artdetail-main-row" class="row flex-grow-1" style="padding: 20px;">
+        <div id="tap-artdetail-metadata-div" class="col-md-4 col-sm-12"></div>
+        <div id="tap-artdetail-image-div" class="col-md-8 col-sm-12"></div>
+    </div>
+</div>
+
+<div id="tap-footer-div"></div>
+
+<!-- JS INCLUDES -->
+<script src="../js/bootstrap.bundle.min.js"></script>
+<script src="../js/openseadragon/openseadragon.min.js"></script>
+<script src="../js/templates/global.js"></script>
+<script src="../js/corpora.js"></script>
+<script src="../js/config.js"></script>
+<script src="../js/schiwetz.js"></script>
+
+<!-- MAIN JS ENTRYPOINT -->
+<script language="javascript">
+    window.corpus = null
+    window.rootPath = '../'
+    window.getParams = new URLSearchParams(window.location.search)
+
+    // MAIN ENTRY POINT
+    document.addEventListener('DOMContentLoaded', function() {
+        prependToEl(getEl('tap-header-div'), siteHeaderTemplate({rootPath: window.rootPath}))
+        appendToEl(getEl('tap-footer-div'), siteFooterTemplate({rootPath: window.rootPath}))
+
+        getSchiwetzCorpus(
+            (corpus) => {
+                window.corpus = corpus
+                window.showLinks = window.getParams.get('filters') !== 'off'
+
+                // adjust main row depending on screen size
+                if (window.innerWidth <= 767) getEl('tap-artdetail-main-row').classList.add('flex-column-reverse')
+
+                // get artwork id
+                window.artworkID = window.getParams.get('id')
+
+                // grab all the metadata for our artwork
+                if (window.artworkID) {
+                    window.artwork = window.corpus.getContent('ArtWork', window.artworkID)
+                    let metadataDiv = getEl('tap-artdetail-metadata-div')
+                    let imageDiv = getEl('tap-artdetail-image-div')
+
+                    // exhibitions
+                    window.artwork.exhibits = window.corpus.getAssociatedContents('ArtWork', window.artworkID, 'Exhibition')
+
+                    // prizes
+                    window.artwork.prizes = window.corpus.getAssociatedContents('ArtWork', window.artworkID, 'Prize')
+
+                    // display metadata
+                    appendToEl(metadataDiv, `
+                        <div class="tap-artgrid-metadata p-0 m-0">
+                            <h1 class="pt-0">${artwork.title}</h1>
+                            ${renderArtworkMetadata(artwork, 'full', window.showLinks)}
+                        </div>
+                    `)
+
+                    // display image
+                    if (artwork.display_restriction && ['Thumbnail Only', 'No Image'].includes(artwork.display_restriction.label)) {
+                        let artRegion = null
+                        if (artwork.hasOwnProperty('featured_region_x') && artwork.featured_region_x) {
+                            artRegion = `${artwork.featured_region_x},${artwork.featured_region_y},${artwork.featured_region_width},${artwork.featured_region_width}`;
+                        }
+                        appendToEl(imageDiv, `
+                            <img
+                                id="tap-artgrid-img-${artwork.id}"
+                                src="${window.rootPath}img/image-loading.svg"
+                                class="tap-artgrid-img img-responsive mt-4"
+                                data-artwork-id="${artwork.id}"
+                                data-iiif-identifier="${artwork.iiif_uri}"
+                                data-display-restriction="${artwork.display_restriction ? artwork.display_restriction.label : 'none'}"
+                                ${artRegion ? `data-region="${artRegion}"` : ''}
+                                style="display: block; margin: auto;"
+                            />
+                            <div class="text-center text-muted mt-2">The display of this image has been restricted.</div>
+                        `)
+                        let img = getEl(`tap-artgrid-img-${artwork.id}`)
+                        injectImageInfo(img, function() {
+                            renderImage(img, 200, true)
+                        })
+                    } else {
+                        let dragonHeight = `${imageDiv.clientHeight - 40}px`
+                        if (window.innerWidth <= 767) dragonHeight = '50vh';
+                        appendToEl(imageDiv, `
+                            <div id="tap-dragon" class="w-100" style="height: ${dragonHeight};"></div>
+                        `)
+
+                        window.dragon = OpenSeadragon({
+                            id:                 "tap-dragon",
+                            prefixUrl:          `${window.rootPath}js/openseadragon/images/`,
+                            preserveViewport:   false,
+                            visibilityRatio:    1,
+                            minZoomLevel:       null,//.50,
+                            maxZoomLevel:       15,
+                            defaultZoomLevel:   0,
+                            //homeFillsViewer:    true,
+                            showRotationControl: true,
+                            tileSources:   [artwork.iiif_uri],
+                        })
+                    }
+                }
+            }
+        )
+    })
+</script>
+</body>
+</html>

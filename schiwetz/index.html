@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Texas Art Project</title>
+    <link rel="stylesheet" href="../css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://use.typekit.net/qbi7knm.css">
+    <link rel="stylesheet" href="../css/dashicons.css">
+    <link rel="stylesheet" href="../css/tap.css">
+</head>
+<body>
+<div id="tap-header-div"></div>
+
+<div class="container mb-5">
+    <div class="row">
+        <div id="tap-artmenu" class="col-sm-4 p-3">
+            <div id="tap-artmenu-active-filters"></div>
+            <h2 class="tap-menu-heading">Search Schiwetz Artworks</h2>
+            <div class="form-group">
+                <label for="tap-artmenu-search-box" class="visually-hidden">Search</label>
+                <input id="tap-artmenu-search-box" type="text" class="form-control form-control-sm" placeholder="Type here">
+            </div>
+
+            <h2 class="tap-menu-heading mt-3">Filter</h2>
+
+            <details class="tap-artmenu-list">
+                <summary>Decade</summary>
+                <ul id="tap-artmenu-decade-list">
+                </ul>
+            </details>
+
+            <details class="tap-artmenu-list">
+                <summary>Depicted Place</summary>
+                <ul id="tap-artmenu-place-list">
+                </ul>
+            </details>
+
+
+            <details class="tap-artmenu-list">
+                <summary>Collection</summary>
+                <ul id="tap-artmenu-collection-list">
+                </ul>
+            </details>
+
+            <details class="tap-artmenu-list">
+                <summary>Exhibition</summary>
+                <ul id="tap-artmenu-exhibition-list">
+                </ul>
+            </details>
+
+            <details class="tap-artmenu-list">
+                <summary>Prize</summary>
+                <ul id="tap-artmenu-prize-list">
+                </ul>
+            </details>
+
+            <details class="tap-artmenu-list">
+                <summary>Surface</summary>
+                <ul id="tap-artmenu-surface-list">
+                </ul>
+            </details>
+
+            <details class="tap-artmenu-list">
+                <summary>Medium</summary>
+                <ul id="tap-artmenu-medium-list">
+                </ul>
+            </details>
+
+            <details class="tap-artmenu-list">
+                <summary>Color Palette</summary>
+                <ul id="tap-artmenu-palette-list">
+                </ul>
+            </details>
+
+            <details class="tap-artmenu-list">
+                <summary>Theme</summary>
+                <ul id="tap-artmenu-theme-list">
+                </ul>
+            </details>
+
+            <details class="tap-artmenu-list">
+                <summary>Setting</summary>
+                <ul id="tap-artmenu-setting-list">
+                </ul>
+            </details>
+
+            <details class="tap-artmenu-list">
+                <summary>Subject</summary>
+                <ul id="tap-artmenu-subject-list">
+                </ul>
+            </details>
+        </div>
+
+        <div class="col-sm-8">
+            <h1>Edward “Buck” Muegge Schiwetz</h1>
+            <h2>1898 – 1984</h2>
+
+            <p>Born in Cuero, Texas, Buck Schiwetz developed his lifelong habit of sketching during adolescence. His desire to pursue art as a career was discouraged by his father, who insisted he enroll in the engineering program at Texas A&M College. Schiwetz later changed his major and graduated with a degree in architecture. He worked only briefly in the field for the income it provided while he pursued his earliest study of art in Dallas, Houston, and New York City.</p>
+
+            <p>He relentlessly painted for himself, pushing the boundaries of his artistic expression in the face even of failing health, while making a living in advertising. The popularity of his published images of “all things Texas” has overshadowed many of his artistic accomplishments. This project documents Schiwetz’s participation in fine art exhibitions, awards earned in juried competitions, and representation in museum collections—a record of success in the art world that belies his reputation as a commercial illustrator. </p>
+
+            <p><em>More on Schiwetz’s life and work:</em>&nbsp;<a href="essay/">Essay</a>&nbsp;|&nbsp;<a href="map/">Map and Timeline</a></p>
+
+            <div id="tap-artgrid"></div>
+        </div>
+    </div>
+</div>
+
+<div id="tap-footer-div"></div>
+
+<!-- JS INCLUDES -->
+<script src="../js/bootstrap.bundle.min.js"></script>
+<script src="../js/templates/global.js"></script>
+<script src="../js/corpora.js"></script>
+<script src="../js/config.js"></script>
+<script src="../js/schiwetz.js"></script>
+
+<!-- MAIN JS ENTRYPOINT -->
+<script language="javascript">
+    window.corpus = null
+    window.rootPath = '../'
+    window.getParams = new URLSearchParams(window.location.search)
+    window.visibleArtworks = new Set()
+    window.artMenu = null
+
+    // MAIN ENTRY POINT
+    document.addEventListener('DOMContentLoaded', function() {
+        prependToEl(getEl('tap-header-div'), siteHeaderTemplate({rootPath: '../'}))
+        appendToEl(getEl('tap-footer-div'), siteFooterTemplate({rootPath: '../'}))
+
+        getSchiwetzCorpus((corpus) => {
+            window.corpus = corpus
+            window.artMenu = new ArtMenu(Object.keys(schiwetzFacetLabels), showArtworks)
+
+            // create grid cells
+            let artGrid = getEl('tap-artgrid')
+            window.corpus.getContents('ArtWork').forEach(artwork => {
+                let artRegion = null
+                if (artwork.hasOwnProperty('featured_region_x') && artwork.featured_region_x) {
+                    artRegion = `${artwork.featured_region_x},${artwork.featured_region_y},${artwork.featured_region_width},${artwork.featured_region_width}`
+                }
+
+                appendToEl(artGrid, `
+                    <div id="tap-artgrid-cell-${artwork.id}" class="col-md-4 tap-artgrid-cell d-none" data-artwork-id="${artwork.id}">
+                        <img
+                            id="tap-artgrid-img-${artwork.id}"
+                            src="../img/image-loading.svg"
+                            class="tap-artgrid-img img-responsive"
+                            data-artwork-id="${artwork.id}"
+                            data-iiif-identifier="${artwork.iiif_uri}"
+                            data-display-restriction="${artwork.display_restriction ? artwork.display_restriction.label : 'none'}"
+                            ${artRegion ? `data-region="${artRegion}"` : ''}
+                        />
+                    </div>
+                `)
+            })
+
+            // rig up cell click event
+            forElsMatching('.tap-artgrid-cell', cell => cell.addEventListener('click', featureImage))
+
+            collectSchiwetzFacets(window.corpus, window.artMenu)
+            window.artMenu.placeFacets()
+            window.artMenu.applyInitialFilters(window.getParams)
+            window.artMenu.setupSearch(window.corpus)
+            setupImageObserver()
+            showArtworks()
+        })
+    })
+
+    function featureImage(e) {
+        let cell = e.target.closest('.tap-artgrid-cell')
+        if (!cell.classList.contains('featured')) {
+            let featuredImg = getElWithQuery('.tap-artgrid-img.featured')
+            let featuredCell = getElWithQuery('.tap-artgrid-cell.featured')
+            if (featuredImg) {
+                featuredCell.classList.remove('col-md-12')
+                featuredCell.classList.add('col-md-4')
+                renderImage(featuredImg, parseInt(cell.clientWidth))
+                getElWithQuery('.tap-artgrid-metadata').remove()
+                featuredCell.classList.remove('featured')
+                featuredImg.classList.remove('featured')
+            }
+
+            let artworkID = cell.dataset.artworkId
+            let img = getEl(`tap-artgrid-img-${artworkID}`)
+            let gridWidth = parseInt(getEl('tap-artgrid').clientWidth)
+            if (img.dataset.fullwidth)
+                renderImage(img, gridWidth - 10, false)
+            else
+                injectImageInfo(img, () => {
+                    renderImage(img, gridWidth - 10, false)
+                })
+
+            let meta = corpus.getContent('ArtWork', artworkID)
+
+            appendToEl(cell, `
+                <div class="tap-artgrid-metadata">
+                    <h1>${meta.title}</h1>
+                    ${renderArtworkMetadata(meta, 'horizontal')}
+                </div>
+            `)
+
+            cell.classList.remove('col-md-4')
+            cell.classList.add('col-sm-12')
+            cell.classList.add('featured')
+            img.classList.add('featured')
+            setTimeout(function () {
+                cell.scrollIntoView({behavior: "smooth"})
+            }, 1500)
+        }
+    }
+
+    function setupImageObserver() {
+        window.imageObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry && entry.isIntersecting && entry.intersectionRatio >= 0.3) {
+                    let img = entry.target
+
+                    if (!img.dataset.loaded) {
+                        let imgRect = img.getBoundingClientRect()
+                        let imgWidth = parseInt(imgRect.width)
+
+                        if (img.dataset.region) {
+                            renderImage(img, imgWidth)
+                        } else {
+                            injectImageInfo(img, () => {
+                                renderImage(img, imgWidth)
+                            })
+                        }
+                    }
+                }
+            })
+        }, {threshold: 0.3})
+    }
+
+    function showArtworks(matchingArtworkIDs=null) {
+        window.visibleArtworks = window.artMenu.filterArtworks(window.corpus.schema['ArtWork'].ids, matchingArtworkIDs)
+
+        window.corpus.getContents('ArtWork').forEach(artwork => {
+            let artworkCell = getEl(`tap-artgrid-cell-${artwork.id}`)
+            if (window.visibleArtworks.has(artwork.id)) {
+                artworkCell.classList.remove('d-none')
+                if (!artwork._observed) {
+                    setTimeout(() => window.imageObserver.observe(artworkCell.children[0]), 1000)
+                    artwork._observed = true
+                }
+            }
+            else artworkCell.classList.add('d-none')
+        })
+    }
+</script>
+</body>
+</html>

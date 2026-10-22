@@ -26,6 +26,139 @@ function setCssVar(variableName, value) {
     document.documentElement.style.setProperty(variableName, value)
 }
 
+// iiif image functions
+function injectImageInfo(img, callback) {
+    fetch(`${img.dataset.iiifIdentifier}/info.json`)
+        .then(res => res.json())
+        .then(info => {
+            img.dataset.fullwidth = info.width
+            img.dataset.fullheight = info.height
+            if (!img.dataset.region)
+                img.dataset.region = `${parseInt(info.width / 2) - 100},${parseInt(info.height / 2) - 100},200,200`
+            callback()
+        })
+}
+function renderImage(img, size, region_only=true) {
+    let iiif_src = null
+    let width = parseInt(size)
+    let height = parseInt(size)
+
+    if (img.dataset.displayRestriction === 'No Image') {
+        iiif_src = `${window.rootPath}img/image-unavailable.png`
+        if (!region_only) {
+            width = 200
+            height = 200
+        }
+    } else {
+        if (img.dataset.displayRestriction === 'Thumbnail Only' && !region_only) {
+            region_only = true
+            width = 200
+            height = 200
+        }
+
+        if (region_only) {
+            iiif_src = `${img.dataset.iiifIdentifier}/${img.dataset.region}/${size},${size}/0/default.png`
+        } else {
+            if (width > img.dataset.fullwidth) width = img.dataset.fullwidth
+            iiif_src = `${img.dataset.iiifIdentifier}/full/${width},/0/default.png`
+            let ratio = width / img.dataset.fullwidth
+            height = parseInt(ratio * img.dataset.fullheight)
+            img.style.filter = 'brightness(2)'
+            img.onload = () => {
+                img.style.filter = 'brightness(1.1)'
+            }
+        }
+    }
+
+    img.setAttribute('src', iiif_src)
+    img.style.width = `${width}px`
+    img.style.height = `${height}px`
+    img.dataset.loaded = 'true'
+}
+
+// artwork metadata
+function renderArtworkMetadata(artwork, style='vertical', filterLinks=true) {
+    if (style === 'vertical') {
+        return `
+              <dl>
+                ${artwork.year ? `<dt>Year:</dt><dd>${artwork.year}</dd>` : ''}
+                ${artwork.collection && !artwork.anonymize_collector ? `<dt>Collection:</dt><dd>${artwork.collection.label}</dd>` : ''}
+                ${artwork.anonymize_collector ? `<dt>Collection:</dt><dd>Private Collection</dd>` : ''}
+                <dt>Medium:</dt><dd>${artwork.medium}</dd>
+                <dt>Surface:</dt><dd>${artwork.surface}</dd>
+                ${artwork.size_inches ? `<dt>Size:</dt><dd>${artwork.size_inches}</dd>` : ''}
+              </dl>
+              <a class="mt-2" href="${window.rootPath}artwork/?id=${artwork.id}" target="_blank">See more...</a>
+            `
+    } else if (style === 'horizontal') {
+        return `
+                <div class="row">
+                  <div class="col-md-6">
+                    <dl>
+                      ${artwork.year ? `<dt>Year:</dt><dd>${artwork.year}</dd>` : ''}
+                      <dt>Medium:</dt><dd>${artwork.medium}</dd>
+                      <dt>Surface:</dt><dd>${artwork.surface}</dd>
+                    </dl>
+                  </div>
+                  <div class="col-md-6 d-flex flex-column">
+                    <dl style="flex: 1;">
+                      ${artwork.collection && !artwork.anonymize_collector ? `<dt>Collection:</dt><dd>${artwork.collection.label}</dd>` : ''}
+                      ${artwork.anonymize_collector ? `<dt>Collection:</dt><dd>Private Collection</dd>` : ''}
+                      ${artwork.size_inches ? `<dt>Size:</dt><dd>${artwork.size_inches}</dd>` : ''}
+                    </dl>
+                    <div class="w-100 text-end">
+                      <a href="${window.rootPath}artwork/?id=${artwork.id}" target="_blank">See more...</a>
+                    </div>
+                  </div>
+                </div>
+            `
+    } else if (style === 'full') {
+        let tags = []
+        artwork.tags.forEach(tag => {
+            let [key, value] = tag.label.split(': ')
+            tags.push(`<dt>${key}:</dt><dd>${value}</dd>`)
+        })
+
+        let exhibits = []
+        artwork.exhibits.forEach(exhibit => {
+            exhibits.push(`<p>${exhibit.label}</p>`)
+        })
+
+        let prizes = []
+        artwork.prizes.forEach(prize => {
+            prizes.push(`<p><i>${prize.name}</i> awarded at ${prize.exhibit}</p>`)
+        })
+
+        return `
+                <dl>
+                  ${artwork.caption ? `<dt>Caption:</dt><dd>${artwork.caption}</dd>` : ''}
+                  ${artwork.alt_title ? `<dt>Alternate Title</dt><dd>${artwork.alt_title}</dd>` : ''}
+                  <dt>Creator:</dt><dd>${artwork.artists[0].label}</dd>
+                  ${artwork.year ? `<dt>Year:</dt><dd>${artwork.year}</dd>` : ''}
+                  ${artwork.location ? `<dt>Depicted Place:</dt><dd>${filterLinks ? `<a href="${window.rootPath}schiwetz/?place=${artwork.location.id}">` : ''}${artwork.location.label}${filterLinks ? `</a>` : ''}</dd>` : ''}
+                  ${artwork.edition ? `<dt>Edition</dt><dd>${artwork.edition}</dd>` : ''}
+                  ${tags.join('\n')}
+                  ${artwork.medium ? `<dt>Medium:</dt><dd>${filterLinks ? `<a href="${window.rootPath}schiwetz/?medium=${artwork.medium}">` : ''}${artwork.medium}${filterLinks ? '</a>' : ''}</dd>` : ''}
+                  ${artwork.surface ? `<dt>Surface:</dt><dd>${filterLinks ? `<a href="${window.rootPath}schiwetz/?surface=${artwork.surface}">` : ''}${artwork.surface}${filterLinks ? '</a>' : ''}</dd>` : ''}
+                  ${artwork.size_inches ? `<dt>Size:</dt><dd>${artwork.size_inches}</dd>` : ''}
+                  ${artwork.inscriptions ? `<dt>Inscriptions</dt><dd>${artwork.inscriptions}</dd>` : ''}
+                  ${artwork.collection && !artwork.anonymize_collector ? `<dt>Collection:</dt><dd>${filterLinks ? `<a href="${window.rootPath}schiwetz/?collection=${artwork.collection.id}">` : ''}${artwork.collection.label}${filterLinks ? '</a>' : ''}</dd>` : ''}
+                  ${artwork.anonymize_collector ? `<dt>Collection:</dt><dd>${filterLinks ? `<a href="${window.rootPath}schiwetz/?collection=Private Collection">` : ''}Private Collection${filterLinks ? '</a>' : ''}</dd>` : ''}
+                </dl>
+                
+                ${exhibits.length ? `
+                    <h2>Exhibits</h2>
+                    ${exhibits.join('\n')}
+                ` : ''}
+                
+                ${prizes.length ? `
+                    <h2>Prizes</h2>
+                    ${prizes.join('\n')}
+                ` : ''}
+            `
+    }
+}
+
 // basic utility functions
 function callAPI(url, params={}, callback) {
     let fetchURL = url
@@ -221,7 +354,7 @@ class Corpus {
 
         let results = await Promise.all(apiRequests.map(async ({ contentType, url }) => {
             // Kick off the cache read and last-updated check in parallel
-            const cachedRecordPromise = db ? this.#dbGet(db, contentType) : Promise.resolve(null)
+            const cachedRecordPromise = db ? this.#dbGet(db, url) : Promise.resolve(null)
             const lastUpdatedPromise = fetch(`${this.api}/${contentType}/last-updated/`).then(r => r.json())
             const [cachedRecord, lastUpdatedResponse] = await Promise.all([cachedRecordPromise, lastUpdatedPromise])
 
@@ -234,7 +367,7 @@ class Corpus {
             const data = await response.json()
 
             // Store fresh data in the cache for next time (non-blocking)
-            if (db) this.#dbPut(db, contentType, { last_updated: lastUpdatedResponse.last_updated, data }).catch(err => console.warn(`Failed to cache ${contentType}:`, err))
+            if (db) this.#dbPut(db, url, { last_updated: lastUpdatedResponse.last_updated, data }).catch(err => console.warn(`Failed to cache ${contentType}:`, err))
 
             return data
         }))

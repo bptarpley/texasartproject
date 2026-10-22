@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Texas Art Project</title>
+    <link rel="stylesheet" href="../../css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://use.typekit.net/qbi7knm.css">
+    <link rel="stylesheet" href="../../css/dashicons.css">
+    <link rel='stylesheet' href='../../css/leaflet/leaflet.css?ver=7.1'>
+    <link rel='stylesheet' href='../../css/MarkerCluster.css?ver=7.1'>
+    <link rel="stylesheet" href="../../css/tap.css">
+</head>
+<body>
+<div id="tap-header-div"></div>
+
+<div id="tap-artmap" class="container mb-5">
+    <ul class="nav nav-tabs" id="tap-artmap-tabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="texas-tab" data-tab-name="texas" data-bs-toggle="tab" data-bs-target="#texas" type="button" role="tab" aria-controls="texas" aria-selected="true">Texas</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="us-tab" data-bs-toggle="tab" data-bs-target="#us" type="button" role="tab" aria-controls="us" aria-selected="false">United States</button>
+        </li>
+        <li class="ms-auto">
+            <span class="me-3">
+                <svg height="20" width="20">
+                    <circle
+                    class="tap-artmap-marker-circle"
+                    cx="10"
+                    cy="10"
+                    r="8"
+                    fill="white"
+                    stroke="white"
+                    stroke-width="1" />
+                </svg>
+                <span class="tap-artmap-marker-label legend">
+                    Depicted Place
+                </span>
+            </span>
+            <span>
+                <img src="../../img/museum.svg" style="height: 20px; width: 20px;">
+                <span class="tap-artmap-marker-label legend">
+                    Exhibit
+                </span>
+            </span>
+        </li>
+
+    </ul>
+    <div class="tab-content" id="tap-artmap-content">
+        <!-- TEXAS TAB CONTENTS -->
+        <div class="tab-pane fade show active" id="texas" role="tabpanel" aria-labelledby="texas-tab">
+            <div class="row">
+                <div class="col-sm-4" id="tap-texas-artmenu-div">
+                    <div id="tap-artmenu">
+                        <div id="tap-artmenu-active-filters"></div>
+                        <h2 class="tap-menu-heading">Search Schiwetz Artworks</h2>
+                        <div class="form-group">
+                            <label for="tap-artmenu-search-box" class="visually-hidden">Search</label>
+                            <input id="tap-artmenu-search-box" type="text" class="form-control form-control-sm" placeholder="Type here">
+                        </div>
+
+                        <h2 class="tap-menu-heading mt-3">Filter</h2>
+
+                        <details class="tap-artmenu-list">
+                            <summary>Depicted Place</summary>
+                            <ul id="tap-artmenu-place-list">
+                            </ul>
+                        </details>
+
+
+                        <details class="tap-artmenu-list">
+                            <summary>Collection</summary>
+                            <ul id="tap-artmenu-collection-list">
+                            </ul>
+                        </details>
+
+                        <details class="tap-artmenu-list">
+                            <summary>Exhibition</summary>
+                            <ul id="tap-artmenu-exhibition-list">
+                            </ul>
+                        </details>
+
+                        <details class="tap-artmenu-list">
+                            <summary>Prize</summary>
+                            <ul id="tap-artmenu-prize-list">
+                            </ul>
+                        </details>
+
+                        <details class="tap-artmenu-list">
+                            <summary>Surface</summary>
+                            <ul id="tap-artmenu-surface-list">
+                            </ul>
+                        </details>
+
+                        <details class="tap-artmenu-list">
+                            <summary>Medium</summary>
+                            <ul id="tap-artmenu-medium-list">
+                            </ul>
+                        </details>
+
+                        <details class="tap-artmenu-list">
+                            <summary>Color Palette</summary>
+                            <ul id="tap-artmenu-palette-list">
+                            </ul>
+                        </details>
+
+                        <details class="tap-artmenu-list">
+                            <summary>Theme</summary>
+                            <ul id="tap-artmenu-theme-list">
+                            </ul>
+                        </details>
+
+                        <details class="tap-artmenu-list">
+                            <summary>Setting</summary>
+                            <ul id="tap-artmenu-setting-list">
+                            </ul>
+                        </details>
+
+                        <details class="tap-artmenu-list">
+                            <summary>Subject</summary>
+                            <ul id="tap-artmenu-subject-list">
+                            </ul>
+                        </details>
+                    </div>
+                </div>
+                <div class="col-sm-8" id="tap-texas-artmap-div">
+                    <div id="tap-texas-artmap" class="w-100 mb-3" style="height: 600px;"></div>
+                    <tc-range-slider
+                            id="tap-artslider"
+                            class="time-slider"
+                            slider-width="100%"
+                            keyboard-disabled="true"
+                            mousewheel-disabled="true"
+                            min="1880"
+                            max="1990"
+                            value1="1880"
+                            value2="1990"
+                            step="10"
+                            marks="true"
+                            marks-count="12"
+                            marks-values-count="12"
+                            marks-values-color="#000000">
+                    </tc-range-slider>
+                    <div id="tap-artmap-attribution-div" style="margin-top: 65px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- USA TAB CONTENTS -->
+        <div class="tab-pane fade" id="us" role="tabpanel" aria-labelledby="us-tab">
+            <div class="row">
+                <div class="col-sm-4" id="tap-us-artmenu-div"></div>
+                <div class="col-sm-8" id="tap-us-artmap-div">
+                    <div id="tap-us-artmap" class="w-100 mb-3" style="height: 600px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="tap-footer-div"></div>
+
+<!-- JS INCLUDES -->
+<script src="../../js/bootstrap.bundle.min.js"></script>
+<script src="../../js/templates/global.js"></script>
+<script src="../../js/tcrs-marks.min.js?ver=7.1"></script>
+<script src="../../js/toolcool-range-slider.min.js?ver=7.1"></script>
+<script src="../../js/leaflet.js?ver=7.1"></script>
+<script src="../../js/leaflet.markercluster.js?ver=7.1"></script>
+<script src="../../js/corpora.js"></script>
+<script src="../../js/config.js"></script>
+<script src="../../js/schiwetz.js"></script>
+
+<!-- MAIN JS ENTRYPOINT -->
+<script language="javascript">
+    window.corpus = null
+    window.rootPath = '../../'
+    window.getParams = new URLSearchParams(window.location.search)
+    window.activeTab = 'texas'
+    window.visibleArtworks = new Set()
+    window.artMenu = null
+
+    window.texasMap = null
+    window.usMap = null
+    window.markerPopup = null
+    window.exhibitPopup = null
+    window.currentLocation = null
+
+    let artSlider = getEl('tap-artslider')
+
+    // MAIN ENTRY POINT
+    document.addEventListener('DOMContentLoaded', function() {
+        prependToEl(getEl('tap-header-div'), siteHeaderTemplate({rootPath: window.rootPath}))
+        appendToEl(getEl('tap-footer-div'), siteFooterTemplate({rootPath: window.rootPath}))
+
+        getSchiwetzCorpus((corpus) => {
+            window.corpus = corpus
+            window.artMenu = new ArtMenu(
+                Object.keys(schiwetzFacetLabels).filter(category => category !== 'decade'),
+                populateMap
+            )
+
+            // adjust depending on screen size
+            if (window.innerWidth <= 767){
+                artSlider.setAttribute('marks-count', '6')
+                artSlider.setAttribute('marks-values-count', '6')
+            }
+
+            collectSchiwetzFacets(window.corpus, window.artMenu)
+            window.artMenu.placeFacets()
+            window.artMenu.setupSearch(window.corpus)
+
+            L.Control.ZoomHome = L.Control.extend({
+                options: {
+                    position: 'topleft',
+                    homeBounds: null
+                },
+
+                onAdd: function (map) {
+                    let home_button = L.DomUtil.create('button', 'leaflet-control-zoom-home')
+                    home_button.type = 'button'
+                    home_button.title = 'Zoom to Home'
+                    home_button.setAttribute('aria-label', 'Zoom to Home')
+                    home_button.innerHTML = '<span class="dashicons dashicons-admin-home"></span>'
+
+                    L.DomEvent.on(home_button, 'click', () => {
+                        this.zoomHome()
+                    })
+                    L.DomEvent.on(home_button, 'mousedown click dblclick', L.DomEvent.stopPropagation)
+
+                    return home_button
+                },
+
+                zoomHome: function () {
+                    this._map.fitBounds(this.options.homeBounds, {padding: [20, 20]})
+                }
+
+            })
+
+            drawTexasMap()
+        })
+    })
+
+    function drawTexasMap() {
+        fetch(`${window.rootPath}texas_fixed.json`)
+            .then(response => response.json())
+            .then(texasShape => {
+                    let texasBounds = [
+                        [36.48314061639213, -106.5234375],
+                        [25.90864446329127, -93.603515625]
+                    ]
+                    window.texasMap = L.map('tap-texas-artmap', {zoomSnap: 0.3})
+                    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+                        maxZoom: 19,
+                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://cartodb.com/attributions">CartoDB</a>'
+                    }).addTo(window.texasMap)
+                    window.texasMap.fitBounds(texasBounds, {padding: [20, 20]})
+
+                    let texasPoly = L.polygon(texasShape, {
+                        color: '#d5b09d',
+                        fill: true,
+                        fillOpacity: 1,
+                        interactive: false
+                    })
+                    texasPoly.addTo(window.texasMap)
+                    texasPoly.bringToFront()
+
+                    new L.Control.ZoomHome({homeBounds: texasBounds}).addTo(window.texasMap)
+
+                    // move map attribution/credits
+                    let attribution = getElWithQuery('.leaflet-control-attribution')
+                    getEl('tap-artmap-attribution-div').appendChild(attribution)
+
+                    window.markerPopup = L.popup({maxHeight: 300})
+                    window.exhibitPopup = L.popup({maxHeight: 300})
+                    window.texasMap.on('popupclose', e => {
+                        let loc = window.corpus.getContent('Place', window.currentLocation)
+                        window.texasMap.flyTo([loc.coordinates[1], loc.coordinates[0]])
+                    })
+
+                    populateMap()
+                }
+            )
+    }
+
+    function populateMap(matchingArtworkIDs=null) {
+        if (window.markerCluster) window.markerCluster.remove()
+
+        window.visibleArtworks = window.artMenu.filterArtworks(window.corpus.schema['ArtWork'].ids, matchingArtworkIDs)
+
+        // set up marker cluster
+        window.markerCluster = L.markerClusterGroup({
+            iconCreateFunction: cluster => {
+                let size = cluster.getChildCount()
+                return L.divIcon({
+                    className: 'tap-artmap-cluster',
+                    html: `
+                                    <svg height="50" width="50">
+                                      <circle
+                                        class="tap-artmap-marker-circle"
+                                        cx="25"
+                                        cy="25"
+                                        r="24"
+                                        fill="#e3dfdb"
+                                        stroke="white"
+                                        stroke-width="1" />
+                                      <text
+                                        x="${size > 9 ? 17 : 22}"
+                                        y="25"
+                                        stroke="black"
+                                        stroke-width="1"
+                                        dy=".3em">
+                                        ${size}
+                                      </text>
+                                    </svg>
+                                `
+                })
+            },
+            maxClusterRadius: 60
+        })
+
+        let locationsPlotted = new Set()
+        let vetLocation = (loc) => {
+            return (loc && loc.coordinates && !locationsPlotted.has(loc.id) && (loc.state === 'Texas' || window.activeTab !== 'texas'))
+        }
+
+        window.corpus.getContents('ArtWork').forEach(artwork => {
+            if (window.visibleArtworks.has(artwork.id)) {
+                if (vetLocation(artwork.location)) {
+                    let marker = new L.Marker(
+                        [artwork.location.coordinates[1], artwork.location.coordinates[0]],
+                        {
+                            icon: new L.DivIcon({
+                                className: 'tap-artmap-marker',
+                                iconSize: [100, 20],
+                                iconAnchor: [0, 0],
+                                html: `
+                                    <svg height="20" width="20">
+                                      <circle
+                                        class="tap-artmap-marker-circle"
+                                        cx="10"
+                                        cy="10"
+                                        r="8"
+                                        fill="white"
+                                        stroke="white"
+                                        stroke-width="1" />
+                                    </svg>
+                                    <span class="tap-artmap-marker-label">
+                                      ${artwork.location.name}
+                                    </span>
+                                `
+                            })
+                        }
+                    )
+                    marker.on('click', function (e) {
+                        displayMetadata(artwork.location.id)
+                    })
+                    window.markerCluster.addLayer(marker)
+                    locationsPlotted.add(artwork.location.id)
+                }
+
+                let artworkEvents = window.corpus.getAssociatedContents('ArtWork', artwork.id, 'Event')
+                artworkEvents.forEach((event) => {
+                    if (vetLocation(event.location)) {
+                        let marker = new L.Marker(
+                            [event.location.coordinates[1], event.location.coordinates[0]],
+                            {
+                                icon: new L.DivIcon({
+                                    className: 'tap-artmap-marker',
+                                    iconSize: [30, 44],
+                                    iconAnchor: [10, 30],
+                                    html: `
+                                        <img src="${window.rootPath}img/museum-marker.svg" class="tap-artmap-exhibit-marker">
+                                    `
+                                })
+                            }
+                        )
+                        marker.bindTooltip(event.label).openTooltip()
+                        marker.on('click', function (e) {
+                            displayExhibit(event.id)
+                        })
+                        window.markerCluster.addLayer(marker)
+                        locationsPlotted.add(event.location.id)
+                    }
+                })
+            }
+        })
+
+        if (window.activeTab === 'texas') window.texasMap.addLayer(window.markerCluster)
+    }
+
+    function displayMetadata(locationID) {
+        let location = window.corpus.getContent('Place', locationID)
+        let meta = `<div class="accordion" id="tap-artmap-metadata-popup">`
+        window.currentLocation = locationID
+
+        let locationArtworks = window.corpus.getAssociatedContents('Place', locationID, 'ArtWork')
+        locationArtworks.forEach((artwork, i) => {
+            let artRegion = null
+            if (artwork.hasOwnProperty('featured_region_x') && artwork.featured_region_x) {
+                artRegion = `${artwork.featured_region_x},${artwork.featured_region_y},${artwork.featured_region_width},${artwork.featured_region_width}`
+            }
+
+            let tags = []
+            artwork.tags.forEach(tag => {
+                let [key, value] = tag.label.split(': ')
+                tags.push(`<dt>${key}:</dt><dd>${value}</dd>`)
+            })
+
+            meta += `
+                <div class="card">
+                  <div class="tap-card-header" id="heading${i}">
+                      <button class="btn w-100 text-start" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${i}" aria-expanded="${i === 0 ? 'true': 'false'}" aria-controls="collapse${i}">
+                        ${i + 1}. ${artwork.title}
+                      </button>
+                  </div>
+
+                  <div id="collapse${i}" class="collapse${i === 0 ? ' show' : ''}" aria-labelledby="heading${i}" data-bs-parent="#tap-artmap-metadata-popup">
+                    <div class="card-body">
+                      <img
+                        id="tap-artgrid-img-${artwork.id}"
+                        src="${window.rootPath}img/image-loading.svg"
+                        class="tap-artgrid-img img-responsive mb-2"
+                        data-artwork-id="${artwork.id}"
+                        data-iiif-identifier="${artwork.iiif_uri}"
+                        data-display-restriction="${artwork.display_restriction ? artwork.display_restriction.label : 'none'}"
+                        ${artRegion ? `data-region="${artRegion}"` : ''}
+                      />
+                      ${renderArtworkMetadata(artwork, 'vertical')}
+                    </div>
+                  </div>
+                </div>
+            `
+        })
+
+        meta += `</div>`
+
+        let activeMap = window.texasMap
+        if (window.activeTab === 'us') activeMap = window.usMap
+
+        window.markerPopup
+            .setLatLng([location.coordinates[1], location.coordinates[0]])
+            .setContent(meta)
+            .openOn(activeMap)
+
+        let popupMetadataPane = getEl(`tap-artmap-metadata-popup`)
+        locationArtworks.forEach(artwork => {
+            let img = getEl(`tap-artgrid-img-${artwork.id}`)
+            injectImageInfo(img, () => {
+                renderImage(img, popupMetadataPane.clientWidth - 20, false)
+            })
+        })
+    }
+
+    function displayExhibit(exhibitID) {
+        let ex = window.corpus.getContent('Event', exhibitID)
+        console.log(ex)
+        if (ex) {
+            let locationID = ex.location.id
+            let meta = `
+                <h2>${ex.title}</h2>
+                <dl>
+                  ${ex.year ? `<dt>Year:</dt><dd>${ex.year}</dd>`: ''}
+                  <dt>Location:</dt><dd>${ex.location.label}</dd>
+                </dl>
+            `
+
+            meta += `<div class="accordion" id="tap-artmap-metadata-popup">`
+            window.currentLocation = locationID
+
+            let exArtworks = window.corpus.getAssociatedContents('Event', exhibitID, 'ArtWork')
+            exArtworks.forEach((artwork, i) => {
+                let artRegion = null
+                if (artwork.hasOwnProperty('featured_region_x') && artwork.featured_region_x) {
+                    artRegion = `${artwork.featured_region_x},${artwork.featured_region_y},${artwork.featured_region_width},${artwork.featured_region_width}`
+                }
+
+                let tags = []
+                artwork.tags.forEach(tag => {
+                    let [key, value] = tag.label.split(': ')
+                    tags.push(`<dt>${key}:</dt><dd>${value}</dd>`)
+                })
+
+                meta += `
+                    <div class="card">
+                      <div class="tap-card-header" id="heading${i}">
+                          <button class="btn w-100 text-start" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${i}" aria-expanded="${i === 0 ? 'true' : 'false'}" aria-controls="collapse${i}">
+                            ${i + 1}. ${artwork.title}
+                          </button>
+                      </div>
+
+                      <div id="collapse${i}" class="collapse${i === 0 ? ' show' : ''}" aria-labelledby="heading${i}" data-bs-parent="#tap-artmap-metadata-popup">
+                        <div class="card-body">
+                          <img
+                            id="tap-artgrid-img-${artwork.id}"
+                            src="${window.rootPath + 'img/image-loading.svg'}"
+                            class="tap-artgrid-img img-responsive mb-2"
+                            data-artwork-id="${artwork.id}"
+                            data-iiif-identifier="${artwork.iiif_uri}"
+                            data-display-restriction="${artwork.display_restriction ? artwork.display_restriction.label : 'none'}"
+                            ${artRegion ? `data-region="${artRegion}"` : ''}
+                          />
+                          ${renderArtworkMetadata(artwork, 'vertical')}
+                        </div>
+                      </div>
+                    </div>
+                `
+            })
+
+            meta += `</div>`
+
+            let activeMap = window.texasMap
+            if (window.activeTab === 'us') activeMap = window.usMap
+
+            window.exhibitPopup
+                .setLatLng(ex.location.coordinates)
+                .setContent(meta)
+                .openOn(activeMap)
+
+            let popupMetadataPane = getEl(`tap-artmap-metadata-popup`)
+            exArtworks.forEach(artwork => {
+                let img = getEl(`tap-artgrid-img-${artwork.id}`)
+                injectImageInfo(img, function () {
+                    renderImage(img, popupMetadataPane.clientWidth - 20, false)
+                })
+            })
+        }
+    }
+</script>
+</body>
+</html>

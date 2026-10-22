@@ -17,6 +17,10 @@
     font-family: "ITCGaramondStdLightItalic";
     src: url('../font/ITCGaramondStdLightItalic.woff2') format('woff2'), url('../font/ITCGaramondStdLightItalic.woff') format('woff');
 }
+@font-face {
+    font-family: "dashicons";
+    src: url('../font/dashicons.woff2') format('woff2');
+}
 
 
 /******************************************
@@ -61,6 +65,17 @@ p {
     font-size: 18px;
 }
 
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
 /******************************************
     TOP MENU
 /*****************************************/
@@ -98,6 +113,10 @@ body.homepage .navbar-toggler { margin-left: auto; }
 }
 .dropdown-menu {
     margin-left: 40px!important;
+}
+.dropdown-header {
+    padding: 0 15px;
+    color: #000000;
 }
 .dropdown-item {
     margin-left: 10px;
@@ -222,10 +241,36 @@ h3.multi-line {
 }
 @media (max-width: 991px) { .project-card-grid { grid-template-columns: 1fr; } }
 
+@media (max-width: 575.98px) {
+    .home-heading {
+        box-shadow: none;
+    }
+    .home-heading::before {
+        content: "";
+        line-height: 0;
+        font-size: 0;
+        position: absolute;
+        bottom: 100%;
+        left: 0;
+        z-index: -1;
+        height: 10px;
+        width: 100%;
+        background: linear-gradient(135deg, transparent 50%, white 50%) 0 0, linear-gradient(-135deg, transparent 50%, white 50%) 0 0;
+        background-repeat: repeat-x;
+        background-size: 16px 20px;
+    }
+    .home-card {
+        box-shadow: none;
+    }
+}
+
 a.project-card-link { text-decoration: none !important; }
-a.project-card-link:hover { padding: 0 10px; color: #000000 !important; }
+a.project-card-link:hover { color: #000000 !important; }
 a .project-card { cursor: pointer; }
-a .project-card:hover { background-color: #f2f2f2; }
+a.project-card-link:hover .project-card {
+    background-color: #f2f2f2;
+    padding: 10px;
+}
 .project-card {
     display: grid;
     grid-template-rows: 8fr 1fr 1fr;
@@ -427,7 +472,6 @@ dd.below {
 }
 
 .tap-artmenu-active-filter {
-    display: block;
     background-color: #008DAB;
     color: white;
     font-weight: normal!important;
